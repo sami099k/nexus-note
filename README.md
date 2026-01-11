@@ -1,4 +1,4 @@
-# Project Setup
+# Nexus Note
 
 This repository contains a Node/Express backend and a Vite React frontend.
 
@@ -12,7 +12,7 @@ This repository contains a Node/Express backend and a Vite React frontend.
 ```bash
 # From repository root
 npm install
-npm --prefix frontend/vite-project install
+npm --prefix frontend install
 ```
 
 ## Environment
@@ -30,7 +30,7 @@ cp .env.example .env
 npm run dev
 
 # Start frontend only
-npm --prefix frontend/vite-project run dev
+npm --prefix frontend run dev
 
 # Start both concurrently
 npm run serve
@@ -46,12 +46,12 @@ Backend runs on http://localhost:5000. Frontend runs on http://localhost:5173 an
 ## Build (frontend)
 
 ```bash
-npm --prefix frontend/vite-project run build
+npm --prefix frontend run build
 ```
 
-Output is in `frontend/vite-project/dist`.
+Output is in `frontend/dist`.
 
 ## Notes
 
 - Routers, controllers, and models directories are scaffolded; add your routes under `routers/` and wire them in `index.js`.
-- Adjust the Vite proxy in `frontend/vite-project/vite.config.js` if your backend port changes.
+- Adjust the Vite proxy in `frontend/vite.config.js` if your backend port changes.
