@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NexusNotes Signup</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+    font-family: 'Poppins', sans-serif;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #0a0a0a;
+}
+
+.container {
+    width: 800px;
+    height: 500px;
+    display: flex;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 0 30px rgba(128, 0, 255, 0.5);
+}
+
+/* LEFT */
+.left {
+    width: 50%;
+    background: linear-gradient(135deg, #6a00ff, #8e2de2);
+    color: white;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    clip-path: polygon(0 0, 100% 0, 75% 100%, 0% 100%);
+}
+
+.left h1 {
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+/* RIGHT */
+.right {
+    width: 50%;
+    background: #0f0f0f;
+    color: white;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.right h2 { margin-bottom: 10px; }
+.right p { color: #aaa; margin-bottom: 20px; font-size: 13px; }
+
+input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #555;
+    padding: 8px 0;
+    margin-bottom: 20px;
+    color: white;
+    outline: none;
+}
+
+input:focus {
+    border-bottom: 1px solid #8e2de2;
+}
+
+button {
+    padding: 10px;
+    border: none;
+    border-radius: 20px;
+    background: linear-gradient(to right, #6a00ff, #8e2de2);
+    color: white;
+    cursor: pointer;
+}
+
+.link {
+    margin-top: 15px;
+    font-size: 13px;
+}
+
+.link a {
+    color: #8e2de2;
+    text-decoration: none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="left">
+    <h1>Join NexusNotes</h1>
+    <p>Create your account and access all study resources.</p>
+</div>
+
+<div class="right">
+    <h2>Sign Up</h2>
+    <p>Create your account</p>
+
+    <input type="text" id="fullName" placeholder="Full Name">
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <input type="password" id="confirm" placeholder="Confirm Password">
+
+    <button id="registerBtn" onclick="handleRegister()">Register</button>
+    <p id="errorMsg" style="color:#ff4d4d; font-size:13px; margin-top:10px; display:none;"></p>
+
+    <div class="link">
+        Already have an account? <a href="login.html">Login</a>
+    </div>
+</div>
+
+</div>
+
+<script>
+async function handleRegister() {
+    const fullName = document.getElementById('fullName').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm').value;
+    const errorMsg = document.getElementById('errorMsg');
+    const btn = document.getElementById('registerBtn');
+
+    errorMsg.style.display = 'none';
+
+    if (!fullName || !email || !password || !confirm) {
+        errorMsg.textContent = 'All fields are required.';
+        errorMsg.style.display = 'block';
+        return;
+    }
+
+    if (password !== confirm) {
+        errorMsg.textContent = 'Passwords do not match.';
+        errorMsg.style.display = 'block';
+        return;
+    }
+
+    if (password.length < 6) {
+        errorMsg.textContent = 'Password must be at least 6 characters.';
+        errorMsg.style.display = 'block';
+        return;
+    }
+
+    btn.textContent = 'Creating account...';
+    btn.disabled = true;
+
+    try {
+        const res = await fetch('http://localhost:5000/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fullName, email, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.message || 'Registration failed');
+        }
+
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        window.location.href = 'home.html';
+    } catch (err) {
+        errorMsg.textContent = err.message;
+        errorMsg.style.display = 'block';
+        btn.textContent = 'Register';
+        btn.disabled = false;
+    }
+}
+</script>
+
+</body>
+</html>

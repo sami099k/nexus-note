@@ -10,7 +10,7 @@
     "dev": "nodemon index.js",
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "concurrently \"npm run dev\" \"npm --prefix frontend/vite-project run dev\""
+    "serve": "concurrently \"npm run dev\" \"npm --prefix frontend run dev\""
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

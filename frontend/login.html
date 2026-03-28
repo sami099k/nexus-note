@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NexusNotes Login</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #0a0a0a;
+}
+
+/* Main Box */
+.container {
+    width: 800px;
+    height: 450px;
+    display: flex;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 0 30px rgba(128, 0, 255, 0.5);
+}
+
+/* LEFT SIDE */
+.left {
+    width: 50%;
+    background: linear-gradient(135deg, #6a00ff, #8e2de2);
+    color: white;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    clip-path: polygon(0 0, 100% 0, 75% 100%, 0% 100%);
+}
+
+.left h1 {
+    font-size: 28px;
+    margin-bottom: 15px;
+}
+
+.left p {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* RIGHT SIDE */
+.right {
+    width: 50%;
+    background: #0f0f0f;
+    color: white;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Title */
+.right h2 {
+    margin-bottom: 10px;
+}
+
+.right p {
+    font-size: 13px;
+    color: #aaa;
+    margin-bottom: 25px;
+}
+
+/* Inputs */
+.input-group {
+    margin-bottom: 20px;
+}
+
+input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #555;
+    padding: 8px 0;
+    color: white;
+    outline: none;
+}
+
+input:focus {
+    border-bottom: 1px solid #8e2de2;
+}
+
+/* Button */
+button {
+    margin-top: 15px;
+    padding: 10px;
+    border: none;
+    border-radius: 20px;
+    background: linear-gradient(to right, #6a00ff, #8e2de2);
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+
+/* Link */
+.link {
+    margin-top: 15px;
+    font-size: 13px;
+}
+
+.link a {
+    color: #8e2de2;
+    text-decoration: none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- LEFT -->
+    <div class="left">
+        <h1>Welcome Back!</h1>
+        <p>Access all your academic resources in one place.</p>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right">
+        <h2>NexusNotes</h2>
+        <p>login to continue</p>
+
+        <div class="input-group">
+            <input type="email" id="email" placeholder="Email">
+        </div>
+
+        <div class="input-group">
+            <input type="password" id="password" placeholder="Password">
+        </div>
+
+        <button id="loginBtn" onclick="handleLogin()">Login</button>
+        <p id="errorMsg" style="color:#ff4d4d; font-size:13px; margin-top:10px; display:none;"></p>
+
+        <div class="link">
+            Don't have an account? <a href="signup.html">Sign up</a>
+        </div>
+    </div>
+
+</div>
+
+<script>
+async function handleLogin() {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const errorMsg = document.getElementById('errorMsg');
+    const btn = document.getElementById('loginBtn');
+
+    if (!email || !password) {
+        errorMsg.textContent = 'Please enter email and password.';
+        errorMsg.style.display = 'block';
+        return;
+    }
+
+    btn.textContent = 'Logging in...';
+    btn.disabled = true;
+    errorMsg.style.display = 'none';
+
+    try {
+        const res = await fetch('http://localhost:5000/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.message || 'Login failed');
+        }
+
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        window.location.href = 'home.html';
+    } catch (err) {
+        errorMsg.textContent = err.message;
+        errorMsg.style.display = 'block';
+        btn.textContent = 'Login';
+        btn.disabled = false;
+    }
+}
+
+// Allow Enter key to submit
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') handleLogin();
+});
+</script>
+
+</body>
+</html>

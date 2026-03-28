@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Subject - NexusNotes</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: #0a0a0a;
+    color: white;
+}
+
+/* HEADER */
+.header {
+    background: #111;
+    padding: 15px 30px;
+    box-shadow: 0 0 10px rgba(128,0,255,0.3);
+}
+
+/* CONTENT */
+.container {
+    padding: 30px;
+}
+
+/* SECTIONS */
+.section {
+    margin-top: 30px;
+}
+
+.box {
+    background: #111;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.box:hover {
+    background: #8e2de2;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <h2 id="subjectName">Subject</h2>
+</div>
+
+<div class="container">
+
+    <!-- NOTES -->
+    <div class="section">
+        <h3>📘 Notes</h3>
+        <div id="notesContainer">
+            <div class="box" style="color:#aaa;cursor:default;">Loading...</div>
+        </div>
+    </div>
+
+    <!-- QUESTIONS -->
+    <div class="section">
+        <h3>❓ Question Bank</h3>
+        <div id="questionsContainer">
+            <div class="box" style="color:#aaa;cursor:default;">Loading...</div>
+        </div>
+    </div>
+
+    <!-- PROJECTS -->
+    <div class="section">
+        <h3>💡 Projects</h3>
+        <div id="projectsContainer">
+            <div class="box" style="color:#aaa;cursor:default;">Loading...</div>
+        </div>
+    </div>
+
+    <!-- TECH TRENDS -->
+    <div class="section">
+        <h3>🚀 Tech Trends</h3>
+        <div class="box">Latest advancements in this subject</div>
+    </div>
+
+</div>
+
+<script>
+const API = 'http://localhost:5000/api';
+const params = new URLSearchParams(window.location.search);
+const subjectId = params.get('id');
+const subjectName = params.get('name') || 'Subject';
+
+// Auth guard
+const token = localStorage.getItem('token');
+if (!token) { window.location.href = 'login.html'; }
+
+function authHeaders() {
+    return { 'Authorization': 'Bearer ' + token };
+}
+
+// Set subject title
+document.getElementById('subjectName').innerText = subjectName;
+
+async function loadSubjectData() {
+    if (!subjectId) {
+        renderFallback();
+        return;
+    }
+
+    try {
+        const res = await fetch(API + '/resources?subjectId=' + subjectId + '&limit=50', { headers: authHeaders() });
+        if (res.status === 401) { window.location.href = 'login.html'; return; }
+        const data = await res.json();
+        const resources = data.data || data || [];
+
+        const notes     = resources.filter(r => r.type === 'NOTE'     || r.category === 'NOTE');
+        const questions = resources.filter(r => r.type === 'QUESTION' || r.category === 'QUESTION');
+        const projects  = resources.filter(r => r.type === 'PROJECT'  || r.category === 'PROJECT');
+        const others    = resources.filter(r => !['NOTE','QUESTION','PROJECT'].includes(r.type || r.category));
+
+        renderSection('notesContainer',     notes.length     ? notes     : others.slice(0,3), 'No notes uploaded yet.');
+        renderSection('questionsContainer', questions.length ? questions : [],               'No questions uploaded yet.');
+        renderSection('projectsContainer',  projects.length  ? projects  : [],               'No projects uploaded yet.');
+
+    } catch (e) {
+        ['notesContainer','questionsContainer','projectsContainer'].forEach(id => {
+            document.getElementById(id).innerHTML = '<div class="box" style="color:#aaa;">Failed to load resources.</div>';
+        });
+    }
+}
+
+function renderSection(containerId, items, emptyMsg) {
+    const container = document.getElementById(containerId);
+    if (!items.length) {
+        container.innerHTML = `<div class="box" style="color:#aaa;cursor:default;">${emptyMsg}</div>`;
+        return;
+    }
+    container.innerHTML = items.map(r => {
+        const title = r.title || r.name || r.fileName || 'Resource';
+        const clickable = r.fileUrl ? `onclick="window.open('${r.fileUrl}','_blank')"` : '';
+        const badge = r.type || r.category || '';
+        return `<div class="box" ${clickable}>${title}${badge ? ' <span style="font-size:11px;color:#8e2de2;">['+badge+']</span>' : ''}</div>`;
+    }).join('');
+}
+
+function renderFallback() {
+    // No subjectId in URL — show placeholder
+    ['notesContainer','questionsContainer','projectsContainer'].forEach(id => {
+        document.getElementById(id).innerHTML = '<div class="box" style="color:#aaa;cursor:default;">No subject selected.</div>';
+    });
+}
+
+loadSubjectData();
+</script>
+
+</body>
+</html>
