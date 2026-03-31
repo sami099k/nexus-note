@@ -1,13 +1,554 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>vite-project</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexusNotes | Study Better Together</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #050f1b;
+  --bg-soft: #0f223b;
+  --panel: rgba(11, 31, 53, 0.8);
+  --highlight: #2ee7ff;
+  --signal: #80ffc2;
+  --warm: #ffb347;
+  --text: #f4f7fb;
+  --muted: #b2c5df;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Space Grotesk', sans-serif;
+  background: radial-gradient(circle at 12% 8%, #1d446c 0%, transparent 35%), radial-gradient(circle at 90% 16%, #1f3554 0%, transparent 30%), var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+.cursor-ambient {
+  position: fixed;
+  width: 220px;
+  height: 180px;
+  border-radius: 54% 46% 58% 42% / 46% 38% 62% 54%;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 45% 40%, rgba(46, 231, 255, 0.22), rgba(46, 231, 255, 0.08) 56%, rgba(46, 231, 255, 0));
+  transform: translate(-50%, -50%);
+  filter: blur(4px);
+  opacity: 0;
+  z-index: 5;
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+.tech-grid {
+  position: fixed;
+  inset: 0;
+  background-image: linear-gradient(rgba(86, 130, 176, 0.17) 1px, transparent 1px), linear-gradient(90deg, rgba(86, 130, 176, 0.12) 1px, transparent 1px);
+  background-size: 54px 54px;
+  mask-image: radial-gradient(circle at 50% 20%, black, transparent 72%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.scan-beam,
+.scan-beam-2 {
+  position: fixed;
+  width: 36vw;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(46, 231, 255, 0), rgba(46, 231, 255, 0.8), rgba(46, 231, 255, 0));
+  filter: drop-shadow(0 0 10px rgba(46, 231, 255, 0.7));
+  pointer-events: none;
+  z-index: 0;
+}
+
+.scan-beam {
+  top: 28vh;
+  left: -40vw;
+  animation: sweep 13s linear infinite;
+}
+
+.scan-beam-2 {
+  top: 70vh;
+  right: -40vw;
+  animation: sweepReverse 16s linear infinite;
+}
+
+.hex-wire {
+  position: fixed;
+  width: 140px;
+  height: 140px;
+  border: 1px solid rgba(46, 231, 255, 0.38);
+  clip-path: polygon(25% 6%, 75% 6%, 96% 50%, 75% 94%, 25% 94%, 4% 50%);
+  right: 6vw;
+  top: 20vh;
+  opacity: 0.42;
+  animation: spinHex 16s linear infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.starfield,
+.balls-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.star {
+  position: absolute;
+  width: var(--size, 2px);
+  height: var(--size, 2px);
+  left: var(--x);
+  top: var(--y);
+  border-radius: 50%;
+  background: rgba(226, 242, 255, 0.95);
+  box-shadow: 0 0 8px rgba(142, 214, 255, 0.7);
+  opacity: 0.16;
+  animation: twinkle var(--dur, 4s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.shooting-star {
+  position: absolute;
+  top: var(--y);
+  left: -15vw;
+  width: 16vw;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(46, 231, 255, 0), rgba(46, 231, 255, 0.95), rgba(46, 231, 255, 0));
+  filter: drop-shadow(0 0 10px rgba(46, 231, 255, 0.7));
+  transform: rotate(var(--angle, -12deg));
+  opacity: 0;
+  animation: shooting var(--shootDur, 10s) linear infinite;
+  animation-delay: var(--shootDelay, 0s);
+}
+
+.ball {
+  position: absolute;
+  width: var(--w);
+  height: var(--w);
+  left: var(--x);
+  top: var(--y);
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(196, 241, 255, 0.45), rgba(46, 231, 255, 0.08) 52%, rgba(46, 231, 255, 0));
+  border: 1px solid rgba(170, 230, 255, 0.2);
+  filter: blur(0.5px);
+  opacity: 0.17;
+  animation: floatBall var(--dur, 18s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.container {
+  width: min(1100px, 92%);
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  position: sticky;
+  top: 10px;
+  z-index: 10;
+  background: rgba(9, 27, 46, 0.7);
+  border: 1px solid rgba(167, 206, 240, 0.28);
+  border-radius: 14px;
+  backdrop-filter: blur(14px) saturate(130%);
+  overflow: hidden;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.nav::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, rgba(255, 255, 255, 0.02) 16%, rgba(255, 255, 255, 0.26) 40%, rgba(255, 255, 255, 0.04) 60%);
+  transform: translateX(-120%);
+  animation: glossSweep 9s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.nav::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.28);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
+.nav-links a {
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: #d5e5f7;
+}
+
+.nav-links a:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.nav-links,
+.brand {
+  position: relative;
+  z-index: 1;
+}
+
+.brand {
+  font-family: 'Fraunces', serif;
+  font-size: 1.6rem;
+  letter-spacing: 0.4px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.btn {
+  border: 1px solid transparent;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  display: inline-block;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn-outline {
+  border-color: rgba(255, 255, 255, 0.35);
+  color: var(--text);
+}
+
+.btn-primary {
+  background: linear-gradient(120deg, var(--highlight), #3ff7c9);
+  color: #02273b;
+  box-shadow: 0 10px 25px rgba(0, 212, 255, 0.25);
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 34px;
+  align-items: center;
+  padding: 24px 0 40px;
+}
+
+.kicker {
+  color: var(--highlight);
+  font-size: 0.9rem;
+  margin-bottom: 14px;
+  letter-spacing: 1px;
+}
+
+h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(2rem, 6vw, 4rem);
+  line-height: 1.08;
+  margin-bottom: 14px;
+}
+
+.subtitle {
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 22px;
+  max-width: 60ch;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.hero-card {
+  background: linear-gradient(160deg, rgba(26, 55, 89, 0.65), rgba(9, 20, 36, 0.72));
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 20px 20px 8px 20px;
+  padding: 24px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+  animation: floatIn 0.65s ease, bob 6s ease-in-out infinite;
+}
+
+.hero-card h3 {
+  margin-bottom: 10px;
+}
+
+.hero-card p {
+  color: var(--muted);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 8px;
+  padding: 6px 11px;
+  font-size: 0.8rem;
+  color: #d8ebff;
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 16px 0 48px;
+}
+
+.feature {
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 16px;
+  padding: 18px;
+  transition: transform 0.24s ease, border-color 0.24s ease;
+}
+
+.feature-a {
+  border-left: 4px solid var(--highlight);
+}
+
+.feature-b {
+  clip-path: polygon(0 0, 96% 0, 100% 12%, 100% 100%, 0 100%);
+  border-top: 1px solid rgba(128, 255, 194, 0.45);
+}
+
+.feature-c {
+  background: linear-gradient(140deg, rgba(14, 35, 61, 0.82), rgba(10, 27, 46, 0.8));
+  border-right: 4px solid var(--warm);
+}
+
+.feature:hover {
+  transform: translateY(-4px);
+  border-color: rgba(46, 231, 255, 0.5);
+}
+
+.feature h4 {
+  margin-bottom: 8px;
+}
+
+.feature p {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 18px 0 28px;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+@keyframes floatIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes sweep {
+  0% { transform: translateX(0); opacity: 0; }
+  8% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateX(150vw); opacity: 0; }
+}
+
+@keyframes sweepReverse {
+  0% { transform: translateX(0); opacity: 0; }
+  8% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateX(-150vw); opacity: 0; }
+}
+
+@keyframes spinHex {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes glossSweep {
+  0% { transform: translateX(-120%); }
+  45% { transform: translateX(120%); }
+  100% { transform: translateX(120%); }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.12; transform: scale(0.8); }
+  50% { opacity: 0.75; transform: scale(1.28); }
+}
+
+@keyframes shooting {
+  0% { transform: translateX(0) rotate(var(--angle, -12deg)); opacity: 0; }
+  7% { opacity: 1; }
+  24% { transform: translateX(130vw) rotate(var(--angle, -12deg)); opacity: 0; }
+  100% { transform: translateX(130vw) rotate(var(--angle, -12deg)); opacity: 0; }
+}
+
+@keyframes floatBall {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  25% { transform: translateY(-26px) translateX(14px); }
+  50% { transform: translateY(-10px) translateX(-12px); }
+  75% { transform: translateY(18px) translateX(10px); }
+}
+
+@media (max-width: 880px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .features {
+    grid-template-columns: 1fr;
+  }
+
+  .nav {
+    flex-direction: column;
+    gap: 14px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="cursor-ambient" id="cursorAmbient"></div>
+<div class="tech-grid"></div>
+<div class="scan-beam"></div>
+<div class="scan-beam-2"></div>
+<div class="hex-wire"></div>
+<div class="starfield">
+  <span class="star" style="--x:8%; --y:14%; --size:2px; --dur:4.8s; --delay:0.2s"></span>
+  <span class="star" style="--x:18%; --y:28%; --size:3px; --dur:5.4s; --delay:1.1s"></span>
+  <span class="star" style="--x:32%; --y:11%; --size:2px; --dur:4.2s; --delay:0.8s"></span>
+  <span class="star" style="--x:44%; --y:23%; --size:2px; --dur:6.2s; --delay:1.8s"></span>
+  <span class="star" style="--x:58%; --y:12%; --size:3px; --dur:5.2s; --delay:0.3s"></span>
+  <span class="star" style="--x:73%; --y:18%; --size:2px; --dur:4.6s; --delay:1.4s"></span>
+  <span class="star" style="--x:84%; --y:8%; --size:2px; --dur:5.8s; --delay:2.2s"></span>
+  <span class="star" style="--x:92%; --y:26%; --size:3px; --dur:4.9s; --delay:0.7s"></span>
+  <span class="star" style="--x:11%; --y:62%; --size:2px; --dur:5.1s; --delay:1.7s"></span>
+  <span class="star" style="--x:28%; --y:70%; --size:2px; --dur:6.4s; --delay:0.6s"></span>
+  <span class="star" style="--x:41%; --y:83%; --size:3px; --dur:5.7s; --delay:1.2s"></span>
+  <span class="star" style="--x:79%; --y:76%; --size:2px; --dur:5.3s; --delay:0.9s"></span>
+  <span class="shooting-star" style="--y:18%; --angle:-14deg; --shootDur:12s; --shootDelay:1.3s"></span>
+  <span class="shooting-star" style="--y:56%; --angle:-9deg; --shootDur:15s; --shootDelay:5.2s"></span>
+</div>
+<div class="balls-layer">
+  <span class="ball" style="--x:6%; --y:34%; --w:66px; --dur:18s; --delay:0.6s"></span>
+  <span class="ball" style="--x:24%; --y:78%; --w:90px; --dur:22s; --delay:1.2s"></span>
+  <span class="ball" style="--x:52%; --y:66%; --w:72px; --dur:19s; --delay:0.1s"></span>
+  <span class="ball" style="--x:72%; --y:40%; --w:84px; --dur:24s; --delay:2.3s"></span>
+  <span class="ball" style="--x:88%; --y:72%; --w:62px; --dur:17s; --delay:1.7s"></span>
+</div>
+<div class="container">
+  <nav class="nav">
+    <a class="brand" href="index.html">NexusNotes</a>
+    <div class="nav-links">
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a class="btn btn-primary" href="login.html">Get Started</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div>
+      <p class="kicker">YOUR LEARNING HUB</p>
+      <h1>One place for notes, subjects, and academic momentum.</h1>
+      <p class="subtitle">
+        NexusNotes helps students discover resources quickly, follow tech trends,
+        and collaborate in one focused workspace.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-outline" href="home.html">Enter Dashboard</a>
+      </div>
+    </div>
+    <aside class="hero-card">
+      <h3>What you can do</h3>
+      <p>
+        Search subjects, open resources, see current tech trends, and keep your recent uploads within reach.
+      </p>
+      <div class="chip-row">
+        <span class="chip">Subject Library</span>
+        <span class="chip">Question Bank</span>
+        <span class="chip">Project Ideas</span>
+        <span class="chip">Trend Radar</span>
+      </div>
+    </aside>
+  </section>
+
+  <section class="features">
+    <article class="feature feature-a">
+      <h4>Subject-first navigation</h4>
+      <p>Jump to specific topics quickly and open dedicated subject pages with filtered resources.</p>
+    </article>
+    <article class="feature feature-b">
+      <h4>Realtime dashboard feel</h4>
+      <p>Get recent uploads and trending content the moment you enter your home view.</p>
+    </article>
+    <article class="feature feature-c">
+      <h4>Clean auth flow</h4>
+      <p>Start from landing, login or signup, then move directly to dashboard without confusion.</p>
+    </article>
+  </section>
+
+  <footer>
+    <span>NexusNotes platform</span>
+    <span id="footerHint">Discover. Learn. Build.</span>
+  </footer>
+</div>
+
+<script>
+const hasToken = Boolean(localStorage.getItem('token'));
+if (hasToken) {
+  document.getElementById('footerHint').textContent = 'Welcome back. Your dashboard is ready.';
+}
+
+const cursorAmbient = document.getElementById('cursorAmbient');
+let hideTimer;
+
+document.addEventListener('mousemove', (event) => {
+  cursorAmbient.style.left = event.clientX + 'px';
+  cursorAmbient.style.top = event.clientY + 'px';
+  cursorAmbient.style.transform = 'translate(-50%, -50%) scale(1.02)';
+  cursorAmbient.style.opacity = '0.85';
+
+  clearTimeout(hideTimer);
+  hideTimer = setTimeout(() => {
+    cursorAmbient.style.opacity = '0';
+    cursorAmbient.style.transform = 'translate(-50%, -50%) scale(1.16)';
+  }, 120);
+});
+</script>
+</body>
 </html>

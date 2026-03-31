@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About | NexusNotes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg: #06101d;
+    --card: rgba(14, 35, 61, 0.8);
+    --text: #f4f7fb;
+    --muted: #b7c4d8;
+    --accent: #2ee7ff;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: radial-gradient(circle at 10% 5%, #1a446f 0%, transparent 35%), radial-gradient(circle at 90% 30%, #2b3f5d 0%, transparent 28%), var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow: hidden;
+}
+.container { width: min(900px, 92%); margin: 0 auto; padding: 30px 0 50px; position: relative; z-index: 1; }
+.pulse {
+    position: fixed;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(46,231,255,0.2), rgba(46,231,255,0));
+    transform: translate(-50%, -50%);
+    z-index: 0;
+}
+.orb {
+    position: fixed;
+    border-radius: 50%;
+    opacity: 0.3;
+    filter: blur(3px);
+    z-index: 0;
+}
+.orb-a {
+    width: 220px;
+    height: 220px;
+    background: #59e8ff;
+    left: -70px;
+    top: 18vh;
+    animation: driftA 14s ease-in-out infinite;
+}
+.orb-b {
+    width: 280px;
+    height: 280px;
+    background: #9effbb;
+    right: -90px;
+    top: 60vh;
+    animation: driftB 16s ease-in-out infinite;
+}
+header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+a { color: inherit; text-decoration: none; }
+.badge { color: var(--accent); font-size: 0.85rem; margin-bottom: 10px; }
+h1 { font-family: 'Fraunces', serif; font-size: clamp(2rem, 5vw, 3.3rem); margin-bottom: 15px; }
+.card {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    padding: 20px;
+    margin-top: 16px;
+    transition: transform 0.24s ease, border-color 0.24s ease;
+}
+.card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(46, 231, 255, 0.45);
+}
+p { color: var(--muted); line-height: 1.65; }
+.links { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 10px; }
+.links a {
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+    padding: 9px 12px;
+}
+
+@keyframes driftA {
+    0%, 100% { transform: translateY(0) translateX(0); }
+    50% { transform: translateY(-24px) translateX(20px); }
+}
+
+@keyframes driftB {
+    0%, 100% { transform: translateY(0) translateX(0); }
+    50% { transform: translateY(20px) translateX(-20px); }
+}
+</style>
+</head>
+<body>
+<div class="pulse" id="pulse"></div>
+<div class="orb orb-a"></div>
+<div class="orb orb-b"></div>
+<div class="container">
+    <header>
+        <a href="index.html">NexusNotes</a>
+        <a href="home.html">Dashboard</a>
+    </header>
+
+    <p class="badge">ABOUT</p>
+    <h1>Built to organize student workflows end-to-end.</h1>
+
+    <section class="card">
+        <p>
+            NexusNotes is a student-focused frontend for discovering subjects, opening curated resources,
+            and keeping study activity visible in one dashboard. The project uses a multi-page Vite setup,
+            so each page can be directly opened with a clean URL.
+        </p>
+    </section>
+
+    <section class="card">
+        <p>
+            Core flow: landing page at localhost:5173, login/signup for access, and a dashboard that opens
+            subject-level pages for notes, question banks, and projects.
+        </p>
+    </section>
+
+    <div class="links">
+        <a href="index.html">Back to Landing</a>
+        <a href="home.html">Dashboard</a>
+        <a href="contact.html">Contact</a>
+    </div>
+</div>
+
+<script>
+const pulse = document.getElementById('pulse');
+document.addEventListener('mousemove', (event) => {
+    pulse.style.left = event.clientX + 'px';
+    pulse.style.top = event.clientY + 'px';
+});
+</script>
+</body>
+</html>

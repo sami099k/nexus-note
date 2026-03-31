@@ -2,46 +2,89 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Subject - NexusNotes</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
 
 <style>
+:root {
+    --bg: #0d1b2a;
+    --bg-soft: #1b263b;
+    --card: #102542;
+    --text: #f4f7fb;
+    --muted: #9fb2ca;
+    --accent: #00d4ff;
+}
+
 body {
     margin: 0;
-    font-family: 'Poppins', sans-serif;
-    background: #0a0a0a;
-    color: white;
+    font-family: 'Space Grotesk', sans-serif;
+    background: radial-gradient(circle at top left, #224f7a 0%, var(--bg) 45%), var(--bg);
+    color: var(--text);
 }
 
-/* HEADER */
 .header {
-    background: #111;
-    padding: 15px 30px;
-    box-shadow: 0 0 10px rgba(128,0,255,0.3);
+    background: rgba(16, 37, 66, 0.95);
+    padding: 15px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
-/* CONTENT */
+.header h2 {
+    font-family: 'Fraunces', serif;
+}
+
+.header-links {
+    display: flex;
+    gap: 10px;
+}
+
+.header-links a {
+    color: inherit;
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.22);
+    border-radius: 8px;
+    padding: 7px 10px;
+}
+
 .container {
-    padding: 30px;
+    width: min(1000px, 92%);
+    margin: 0 auto;
+    padding: 26px 0 50px;
 }
 
-/* SECTIONS */
 .section {
     margin-top: 30px;
 }
 
+.section h3 {
+    margin-bottom: 12px;
+}
+
 .box {
-    background: #111;
+    background: rgba(16, 37, 66, 0.9);
+    border: 1px solid rgba(255,255,255,0.1);
     padding: 15px;
     margin: 10px 0;
     border-radius: 8px;
-    transition: 0.3s;
+    transition: 0.2s;
     cursor: pointer;
 }
 
 .box:hover {
-    background: #8e2de2;
+    border-color: rgba(0, 212, 255, 0.5);
+    transform: translateY(-1px);
+}
+
+.muted {
+    color: var(--muted);
 }
 </style>
 </head>
@@ -50,37 +93,42 @@ body {
 
 <div class="header">
     <h2 id="subjectName">Subject</h2>
+    <div class="header-links">
+        <a href="index.html">Landing</a>
+        <a href="home.html">Dashboard</a>
+        <a href="contact.html">Contact</a>
+    </div>
 </div>
 
 <div class="container">
 
     <!-- NOTES -->
     <div class="section">
-        <h3>📘 Notes</h3>
+        <h3>Notes</h3>
         <div id="notesContainer">
-            <div class="box" style="color:#aaa;cursor:default;">Loading...</div>
+            <div class="box muted" style="cursor:default;">Loading...</div>
         </div>
     </div>
 
     <!-- QUESTIONS -->
     <div class="section">
-        <h3>❓ Question Bank</h3>
+        <h3>Question Bank</h3>
         <div id="questionsContainer">
-            <div class="box" style="color:#aaa;cursor:default;">Loading...</div>
+            <div class="box muted" style="cursor:default;">Loading...</div>
         </div>
     </div>
 
     <!-- PROJECTS -->
     <div class="section">
-        <h3>💡 Projects</h3>
+        <h3>Projects</h3>
         <div id="projectsContainer">
-            <div class="box" style="color:#aaa;cursor:default;">Loading...</div>
+            <div class="box muted" style="cursor:default;">Loading...</div>
         </div>
     </div>
 
     <!-- TECH TRENDS -->
     <div class="section">
-        <h3>🚀 Tech Trends</h3>
+        <h3>Tech Trends</h3>
         <div class="box">Latest advancements in this subject</div>
     </div>
 
@@ -134,14 +182,14 @@ async function loadSubjectData() {
 function renderSection(containerId, items, emptyMsg) {
     const container = document.getElementById(containerId);
     if (!items.length) {
-        container.innerHTML = `<div class="box" style="color:#aaa;cursor:default;">${emptyMsg}</div>`;
+        container.innerHTML = `<div class="box muted" style="cursor:default;">${emptyMsg}</div>`;
         return;
     }
     container.innerHTML = items.map(r => {
         const title = r.title || r.name || r.fileName || 'Resource';
         const clickable = r.fileUrl ? `onclick="window.open('${r.fileUrl}','_blank')"` : '';
         const badge = r.type || r.category || '';
-        return `<div class="box" ${clickable}>${title}${badge ? ' <span style="font-size:11px;color:#8e2de2;">['+badge+']</span>' : ''}</div>`;
+        return `<div class="box" ${clickable}>${title}${badge ? ' <span style="font-size:11px;color:#00d4ff;">['+badge+']</span>' : ''}</div>`;
     }).join('');
 }
 
