@@ -162,15 +162,17 @@ button {
     padding: 10px 14px;
     border: none;
     border-radius: 10px;
-    background: linear-gradient(120deg, var(--accent2), #ffc94a);
-    color: #2b1900;
+    background: linear-gradient(120deg, #2f81f7, #79c0ff);
+    color: #f4f7fb;
     font-weight: 700;
     cursor: pointer;
     transition: transform 0.2s ease;
+    box-shadow: 0 8px 18px rgba(47, 129, 247, 0.18);
 }
 
 button:hover {
     transform: translateY(-1px);
+    filter: brightness(1.05);
 }
 
 .link {
@@ -268,7 +270,12 @@ button:hover {
     </div>
 </div>
 
+<script src="auth.js"></script>
 <script>
+(async () => {
+    await window.NexusAuth.redirectIfAuthenticated('home.html');
+})();
+
 async function handleLogin() {
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
@@ -286,20 +293,19 @@ async function handleLogin() {
     errorMsg.style.display = 'none';
 
     try {
-        const res = await fetch('http://localhost:5000/api/auth/login', {
+        const res = await fetch(window.NexusAuth.getApiBase() + '/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
         });
 
-        const data = await res.json();
+        const data = await window.NexusAuth.parseJsonSafe(res);
 
         if (!res.ok) {
-            throw new Error(data.message || 'Login failed');
+            throw new Error((data && data.message) || 'Login failed');
         }
 
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+        window.NexusAuth.saveSession(data.token, data.user);
         window.location.href = 'home.html';
     } catch (err) {
         errorMsg.textContent = err.message;

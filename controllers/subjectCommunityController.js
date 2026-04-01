@@ -127,6 +127,17 @@ const leaveSubject = asyncHandler(async (req, res) => {
   return res.json({ message: 'Left subject room' })
 })
 
+const listMyMemberships = asyncHandler(async (req, res) => {
+  const memberships = await SubjectMembership.find({
+    userId: req.user.id,
+    status: 'ACTIVE'
+  }).select('subjectId')
+
+  return res.json({
+    subjectIds: memberships.map((membership) => String(membership.subjectId))
+  })
+})
+
 const getMyMembership = asyncHandler(async (req, res) => {
   const { id: subjectId } = req.params
   const membership = await SubjectMembership.findOne({
@@ -289,6 +300,10 @@ const addDiscussionReply = asyncHandler(async (req, res) => {
 
 const listSubjectNotes = asyncHandler(async (req, res) => {
   const { id: subjectId } = req.params
+
+  if (!(await ensureRoomAccess(req, res, subjectId))) {
+    return undefined
+  }
 
   const notes = await Resource.find({
     subjectId,
@@ -465,6 +480,7 @@ const getSubjectHub = asyncHandler(async (req, res) => {
 module.exports = {
   joinSubject,
   leaveSubject,
+  listMyMemberships,
   getMyMembership,
   listSubjectMembers,
   createDiscussionThread,

@@ -11,6 +11,8 @@ router.use(authMiddleware)
 
 router.get('/', subjectController.listSubjects)
 
+router.get('/my-memberships', subjectCommunityController.listMyMemberships)
+
 router.get('/:id/hub', subjectCommunityController.getSubjectHub)
 router.post('/:id/join', subjectCommunityController.joinSubject)
 router.delete('/:id/join', subjectCommunityController.leaveSubject)
