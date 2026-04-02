@@ -436,6 +436,8 @@ body {
                 <span class="badge" id="memberCount">Members: -</span>
                 <span class="badge" id="threadCount">Threads: -</span>
                 <span class="badge" id="noteCount">Notes: -</span>
+                <span class="badge" id="questionCount">Interview Qs: -</span>
+                <span class="badge" id="roadmapCount">Roadmaps: -</span>
                 <span class="badge" id="membershipStatus">Not joined</span>
             </div>
             <div class="badges" style="margin-top: 12px;">
@@ -483,6 +485,30 @@ body {
                     </div>
                 </div>
             </section>
+
+            <section class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Interview Questions</h2>
+                    <span class="card-count" id="questionsCardCount">0 questions</span>
+                </div>
+                <div class="card-body">
+                    <div class="list" id="questionsContainer">
+                        <div class="placeholder">Join to view interview questions.</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Roadmap</h2>
+                    <span class="card-count" id="roadmapsCardCount">0 roadmaps</span>
+                </div>
+                <div class="card-body">
+                    <div class="list" id="roadmapsContainer">
+                        <div class="placeholder">Join to view roadmaps.</div>
+                    </div>
+                </div>
+            </section>
         </section>
     </main>
 </div>
@@ -508,6 +534,13 @@ function setCounts(threadsCount, notesCount) {
     document.getElementById('notesCardCount').textContent = String(notesCount) + ' notes';
     document.getElementById('threadCount').textContent = 'Threads: ' + String(threadsCount);
     document.getElementById('noteCount').textContent = 'Notes: ' + String(notesCount);
+}
+
+function setExtras(famousQuestions, roadmaps) {
+    document.getElementById('questionsCardCount').textContent = String(famousQuestions) + ' questions';
+    document.getElementById('roadmapsCardCount').textContent = String(roadmaps) + ' roadmaps';
+    document.getElementById('questionCount').textContent = 'Interview Qs: ' + String(famousQuestions);
+    document.getElementById('roadmapCount').textContent = 'Roadmaps: ' + String(roadmaps);
 }
 
 function setMemberCount(value) {
@@ -592,8 +625,11 @@ function renderFallback() {
     document.getElementById('subjectSubtitle').textContent = 'Open this page from the dashboard to load a selected subject.';
     document.getElementById('discussionsContainer').innerHTML = '<div class="placeholder">No subject selected.</div>';
     document.getElementById('notesContainer').innerHTML = '<div class="placeholder">No subject selected.</div>';
+    document.getElementById('questionsContainer').innerHTML = '<div class="placeholder">No subject selected.</div>';
+    document.getElementById('roadmapsContainer').innerHTML = '<div class="placeholder">No subject selected.</div>';
     setMemberCount('-');
     setCounts('-', '-');
+    setExtras('-', '-');
 }
 
 async function loadHub() {
@@ -633,10 +669,106 @@ async function loadRoomData() {
     if (!isMember) {
         document.getElementById('discussionsContainer').innerHTML = '<div class="placeholder">Join to view discussions.</div>';
         document.getElementById('notesContainer').innerHTML = '<div class="placeholder">Join to view notes.</div>';
+        document.getElementById('questionsContainer').innerHTML = '<div class="placeholder">Join to view interview questions.</div>';
+        document.getElementById('roadmapsContainer').innerHTML = '<div class="placeholder">Join to view roadmaps.</div>';
         return;
     }
 
-    await Promise.all([loadThreads(), loadNotes()]);
+    await Promise.all([loadThreads(), loadNotes(), loadFamousQuestions(), loadRoadmaps()]);
+}
+
+function renderFamousQuestions(items) {
+    const container = document.getElementById('questionsContainer');
+    if (!items.length) {
+        container.innerHTML = '<div class="placeholder">No interview questions yet.</div>';
+        return;
+    }
+
+    container.innerHTML = items.slice(0, 6).map((item) => {
+        const q = String(item.question || 'Question').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const a = String(item.answer || '').trim();
+        const snippet = a.length > 160 ? a.slice(0, 160) + '…' : a;
+        const difficulty = item.difficulty ? String(item.difficulty) : '';
+        const meta = [difficulty, item.isVerified ? 'Verified' : ''].filter(Boolean).join(' · ');
+
+        return '<div class="resource">'
+            + '<div class="resource-title">' + q + '</div>'
+            + (meta ? '<div class="resource-meta">' + meta + '</div>' : '')
+            + (snippet ? '<div class="resource-meta">' + snippet.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>' : '')
+            + '</div>';
+    }).join('');
+}
+
+async function loadFamousQuestions() {
+    const response = await window.NexusAuth.apiFetch('/subjects/' + encodeURIComponent(subjectId) + '/famous-questions', {
+        headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (response.status === 401) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    if (response.status === 403) {
+        document.getElementById('questionsContainer').innerHTML = '<div class="placeholder">Join to view interview questions.</div>';
+        return;
+    }
+
+    const items = await window.NexusAuth.parseJsonSafe(response);
+    const questions = Array.isArray(items) ? items : [];
+    renderFamousQuestions(questions);
+
+    if (hubMetrics && typeof hubMetrics.famousQuestionCount === 'number') {
+        setExtras(hubMetrics.famousQuestionCount, hubMetrics.roadmapCount || 0);
+    } else {
+        const roadmapValue = hubMetrics && typeof hubMetrics.roadmapCount === 'number' ? hubMetrics.roadmapCount : 0;
+        setExtras(questions.length, roadmapValue);
+    }
+}
+
+function renderRoadmaps(items) {
+    const container = document.getElementById('roadmapsContainer');
+    if (!items.length) {
+        container.innerHTML = '<div class="placeholder">No roadmaps published yet.</div>';
+        return;
+    }
+
+    container.innerHTML = items.slice(0, 3).map((item) => {
+        const title = String(item.title || 'Roadmap').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const desc = String(item.description || '').trim();
+        const steps = Array.isArray(item.steps) ? item.steps : [];
+        const stepPreview = steps.slice(0, 3).map((s) => '• ' + String(s.title || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')).filter(Boolean).join('<br>');
+        const meta = steps.length ? steps.length + ' steps' : '';
+
+        return '<div class="resource">'
+            + '<div class="resource-title">' + title + '</div>'
+            + (meta ? '<div class="resource-meta">' + meta + '</div>' : '')
+            + (desc ? '<div class="resource-meta">' + desc.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>' : '')
+            + (stepPreview ? '<div class="resource-meta">' + stepPreview + '</div>' : '')
+            + '</div>';
+    }).join('');
+}
+
+async function loadRoadmaps() {
+    const response = await window.NexusAuth.apiFetch('/subjects/' + encodeURIComponent(subjectId) + '/roadmaps', {
+        headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (response.status === 401) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    const items = await window.NexusAuth.parseJsonSafe(response);
+    const roadmaps = Array.isArray(items) ? items : [];
+    renderRoadmaps(roadmaps);
+
+    if (hubMetrics && typeof hubMetrics.roadmapCount === 'number') {
+        setExtras(hubMetrics.famousQuestionCount || 0, hubMetrics.roadmapCount);
+    } else {
+        const famousValue = hubMetrics && typeof hubMetrics.famousQuestionCount === 'number' ? hubMetrics.famousQuestionCount : 0;
+        setExtras(famousValue, roadmaps.length);
+    }
 }
 
 async function loadThreads() {
@@ -855,6 +987,7 @@ async function initSubjectPage() {
             setMemberCount(hubMetrics.activeMembers);
         }
         setCounts(hubMetrics.threadsCount || 0, hubMetrics.notesCount || 0);
+        setExtras(hubMetrics.famousQuestionCount || 0, hubMetrics.roadmapCount || 0);
     }
 
     await loadMembership();
