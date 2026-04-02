@@ -35,8 +35,8 @@ router.post('/:id/roadmaps', subjectCommunityController.createRoadmap)
 
 router.get('/:id', subjectController.getSubjectById)
 
-router.post('/', authorize(ROLES.OWNER), subjectController.createSubject)
-router.patch('/:id', authorize(ROLES.OWNER), subjectController.updateSubject)
-router.delete('/:id', authorize(ROLES.OWNER), subjectController.deleteSubject)
+router.post('/', authorize(ROLES.USER, ROLES.SUBJECT_ADMIN, ROLES.OWNER), subjectController.createSubject)
+router.patch('/:id', authorize(ROLES.USER, ROLES.SUBJECT_ADMIN, ROLES.OWNER), subjectController.updateSubject)
+router.delete('/:id', authorize(ROLES.USER, ROLES.SUBJECT_ADMIN, ROLES.OWNER), subjectController.deleteSubject)
 
 module.exports = router

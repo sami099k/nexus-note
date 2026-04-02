@@ -117,8 +117,8 @@ body {
 }
 
 .nav a.active {
-    background: #1c2d4a;
-    border-color: #2f81f7;
+    background: #1a2f27;
+    border-color: #2f9e6f;
     color: #ffffff;
 }
 
@@ -162,6 +162,7 @@ body {
 .search-wrap {
     flex: 1;
     max-width: 480px;
+    min-width: 260px;
 }
 
 .search {
@@ -237,8 +238,8 @@ body {
 }
 
 .btn-danger:hover {
-    background: #e0443c;
-    border-color: #e0443c;
+    background: #3a242a;
+    border-color: #84414b;
 }
 
 .hero {
@@ -312,48 +313,25 @@ body {
     padding: 12px 14px;
 }
 
-.subject-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 10px;
-}
-
-.subject-item {
-    border: 1px solid var(--line-soft);
-    border-radius: 8px;
-    background: #111820;
-    padding: 10px;
-    cursor: pointer;
-}
-
-.subject-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 10px;
-}
-
-.subject-actions {
-    display: inline-flex;
-    gap: 8px;
-    align-items: center;
-}
-
-.subject-actions .btn {
-    padding: 7px 10px;
-    font-size: 0.82rem;
-}
-
-.subject-item:hover {
-    border-color: #3e6fb3;
-    background: #151f2a;
-}
-
-.subject-code {
-    font-size: 0.76rem;
-    color: #7fb7ff;
-    margin-top: 6px;
-}
+.subject-shell { display: grid; gap: 12px; }
+.subject-sections { display: grid; gap: 12px; }
+.subject-section-title { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px; }
+.subject-section-title h3 { font-size: 0.95rem; font-weight: 700; }
+.subject-section-title span { color: var(--muted); font-size: 0.82rem; }
+.repo-list { display: grid; gap: 10px; }
+.repo-item { border: 1px solid var(--line-soft); border-radius: 10px; background: #111820; padding: 12px; cursor: pointer; display: grid; gap: 8px; }
+.repo-item:hover { border-color: #3b4552; background: #121b25; }
+.repo-top { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: flex-start; }
+.repo-title { font-weight: 700; line-height: 1.25; }
+.repo-link { color: inherit; text-decoration: none; }
+.repo-link:hover { color: #b9f3dc; text-decoration: underline; text-decoration-color: #2f9e6f; }
+.repo-desc { color: #c7d0da; line-height: 1.45; }
+.repo-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+.badge { border-radius: 999px; border: 1px solid #2a3340; color: #9db8d6; background: #101820; padding: 4px 8px; font-size: 0.76rem; }
+.badge-accent { border-color: #33517d; background: var(--accent-soft); color: #b9d6ff; }
+.badge-muted { border-color: #2f3a48; background: #222b36; color: var(--muted); }
+.repo-actions { display: inline-flex; gap: 8px; align-items: center; justify-content: flex-end; flex-wrap: wrap; }
+.repo-actions .btn { padding: 7px 10px; font-size: 0.82rem; }
 
 .list {
     display: grid;
@@ -370,6 +348,17 @@ body {
 .list-item strong {
     display: block;
     margin-bottom: 4px;
+}
+
+.trend-link {
+    color: #b9f3dc;
+    text-decoration: underline;
+    text-decoration-color: #2f9e6f;
+}
+
+.trend-link:hover {
+    color: #dff9ee;
+    text-decoration-color: #67c497;
 }
 
 .muted { color: var(--muted); }
@@ -481,6 +470,14 @@ body {
             <li><a href="profile.html"><span class="nav-main"><span class="nav-icon icon-profile"></span><span>My Profile</span></span></a></li>
             <li><a class="logout" href="#" onclick="handleLogout(event); return false;"><span class="nav-main"><span class="nav-icon icon-logout"></span><span>Logout</span></span></a></li>
         </ul>
+
+        <div class="nav-group-title">Subject Bases</div>
+        <ul class="nav">
+            <li><a href="#myBases"><span class="nav-main"><span>My Bases</span></span></a></li>
+            <li><a href="#joinedBases"><span class="nav-main"><span>Joined Bases</span></span></a></li>
+            <li><a href="#exploreBases"><span class="nav-main"><span>Explore Public</span></span></a></li>
+            <li><a href="create.html"><span class="nav-main"><span>Create New</span></span></a></li>
+        </ul>
     </aside>
 
     <main class="main">
@@ -515,12 +512,25 @@ body {
         <section class="content-grid">
             <section class="card">
                 <div class="card-header">
-                    <h2 class="card-title">Subjects</h2>
+                    <h2 class="card-title">Available Subject Bases</h2>
                     <span class="muted" id="subjectStatus">Loading...</span>
                 </div>
                 <div class="card-body">
-                    <div class="subject-grid" id="subjectCards">
-                        <div class="placeholder">Loading subjects...</div>
+                    <div class="subject-shell" id="subjectCards">
+                        <div class="subject-sections">
+                            <div>
+                                <div class="subject-section-title" id="myBases"><h3>My Subject Bases</h3><span id="mySubjectsCount">0</span></div>
+                                <div class="repo-list" id="mySubjectsList"><div class="placeholder">Loading...</div></div>
+                            </div>
+                            <div>
+                                <div class="subject-section-title" id="joinedBases"><h3>Joined Subject Bases</h3><span id="joinedSubjectsCount">0</span></div>
+                                <div class="repo-list" id="joinedSubjectsList"><div class="placeholder">Loading...</div></div>
+                            </div>
+                            <div>
+                                <div class="subject-section-title" id="exploreBases"><h3>Explore Public</h3><span id="exploreSubjectsCount">0</span></div>
+                                <div class="repo-list" id="exploreSubjectsList"><div class="placeholder">Loading...</div></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -571,10 +581,33 @@ let allSubjects = [];
 let trendsCount = 0;
 let uploadsCount = 0;
 let myMembershipSubjectIds = new Set();
+let activeUser = null;
+
+function escapeHtml(value) {
+    return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
 
 function forceLogout() {
     window.NexusAuth && window.NexusAuth.clearSession && window.NexusAuth.clearSession();
     window.location.href = 'index.html';
+}
+
+function showToast(message, type) {
+    if (window.NexusAuth && typeof window.NexusAuth.showToast === 'function') {
+        window.NexusAuth.showToast(message, type || 'info');
+    }
+}
+
+function sanitizeHttpUrl(value) {
+    if (!window.NexusAuth || typeof window.NexusAuth.sanitizeUrl !== 'function') {
+        return String(value || '').trim();
+    }
+    return window.NexusAuth.sanitizeUrl(value);
 }
 
 function handleLogout(event) {
@@ -595,6 +628,10 @@ function handleLogout(event) {
 
 function openSubject(id, name) {
     window.location.href = 'subject.html?id=' + encodeURIComponent(id) + '&name=' + encodeURIComponent(name);
+}
+
+function openSubjectManage(id) {
+    window.location.href = 'subject.html?id=' + encodeURIComponent(id) + '&manage=1';
 }
 
 async function loadMyMemberships() {
@@ -632,7 +669,7 @@ function updateCounts() {
 function filterSubjects() {
     const query = document.getElementById('searchInput').value.toLowerCase().trim();
     if (!query) {
-        renderSubjectCards(allSubjects);
+        renderSubjectSections(allSubjects);
         return;
     }
 
@@ -642,115 +679,181 @@ function filterSubjects() {
         return name.includes(query) || code.includes(query);
     });
 
-    renderSubjectCards(filtered);
+    renderSubjectSections(filtered);
     document.getElementById('subjectStatus').textContent = filtered.length + ' matched';
 }
 
-function renderSubjectCards(subjects) {
-    const container = document.getElementById('subjectCards');
+function getVisibility(subject) {
+    const v = String(subject && subject.visibility ? subject.visibility : 'PUBLIC').toUpperCase();
+    return (v === 'PRIVATE' || v === 'PUBLIC') ? v : 'PUBLIC';
+}
+
+function isCreatorOf(subject) {
+    if (!activeUser || !activeUser.id) return false;
+    return String(subject.createdBy || '') === String(activeUser.id);
+}
+
+function renderSubjectList(containerId, subjects, mode) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
     if (!subjects.length) {
-        container.innerHTML = '<div class="placeholder">No subjects found.</div>';
+        container.innerHTML = '<div class="placeholder">Nothing here yet.</div>';
         return;
     }
 
     container.innerHTML = subjects.map((subject) => {
-        const id = subject._id || '';
-        const safeName = String(subject.name || 'Subject').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        const code = subject.code ? '<div class="subject-code">' + String(subject.code) + '</div>' : '';
-        const isMember = id ? myMembershipSubjectIds.has(String(id)) : false;
-        const primary = isMember
-            ? '<button class="btn" data-action="enter" data-id="' + id + '" data-name="' + safeName + '">Enter</button>'
-            : '<button class="btn btn-primary" data-action="join" data-id="' + id + '">Join</button>';
-        const secondary = isMember
-            ? '<button class="btn btn-danger" data-action="leave" data-id="' + id + '">Leave</button>'
-            : '';
+        const id = String(subject._id || '');
+        const name = escapeHtml(subject.name || 'Subject');
+        const desc = escapeHtml(subject.description || '');
+        const code = subject.code ? String(subject.code) : '';
+        const visibility = getVisibility(subject);
+        const isMember = id ? myMembershipSubjectIds.has(id) : false;
+        const mine = isCreatorOf(subject);
+        const href = id ? 'subject.html?id=' + encodeURIComponent(id) + '&name=' + encodeURIComponent(subject.name || 'Subject') : '';
 
-        return '<div class="subject-item" data-id="' + id + '" data-name="' + safeName + '">'
-            + '<div class="subject-row">'
-            + '<div><strong>' + safeName + '</strong>' + code + '</div>'
-            + '<div class="subject-actions">' + primary + secondary + '</div>'
+        const badges = [
+            code ? '<span class="badge badge-accent">' + escapeHtml(code) + '</span>' : '',
+            visibility === 'PRIVATE' ? '<span class="badge badge-muted">Private</span>' : '<span class="badge">Public</span>',
+            isMember ? '<span class="badge">Joined</span>' : ''
+        ].filter(Boolean).join('');
+
+        let actions = '';
+        if (mine) {
+            actions = (id ? '<button class="btn" data-action="open" data-id="' + escapeHtml(id) + '" data-name="' + name + '">Open</button>' : '')
+                + (id ? '<button class="btn" data-action="manage" data-id="' + escapeHtml(id) + '">Manage</button>' : '');
+        } else if (mode === 'explore') {
+            actions = isMember
+                ? '<button class="btn" data-action="open" data-id="' + escapeHtml(id) + '" data-name="' + name + '">Enter</button>'
+                : '<button class="btn btn-primary" data-action="join" data-id="' + escapeHtml(id) + '">Join</button>';
+        } else {
+            actions = isMember
+                ? '<button class="btn" data-action="open" data-id="' + escapeHtml(id) + '" data-name="' + name + '">Enter</button>'
+                    + '<button class="btn btn-danger" data-action="leave" data-id="' + escapeHtml(id) + '">Leave</button>'
+                : '<button class="btn btn-primary" data-action="join" data-id="' + escapeHtml(id) + '">Join</button>';
+        }
+
+        return '<div class="repo-item" data-id="' + escapeHtml(id) + '" data-name="' + name + '">'
+            + '<div class="repo-top">'
+            + '<div>'
+            + '<div class="repo-title">' + (href ? '<a class="repo-link" href="' + href + '">' + name + '</a>' : name) + '</div>'
+            + '<div class="repo-badges">' + badges + '</div>'
             + '</div>'
+            + '<div class="repo-actions">' + actions + '</div>'
+            + '</div>'
+            + (desc ? '<div class="repo-desc">' + desc + '</div>' : '')
             + '</div>';
     }).join('');
 
-    container.querySelectorAll('.subject-item').forEach((card) => {
-        card.addEventListener('click', () => {
-            openSubject(card.dataset.id, card.dataset.name);
-        });
-    });
-
-    container.querySelectorAll('[data-action="enter"]').forEach((btn) => {
-        btn.addEventListener('click', (event) => {
-            event.stopPropagation();
-            openSubject(btn.dataset.id, btn.dataset.name);
-        });
-    });
-
-    container.querySelectorAll('[data-action="join"]').forEach((btn) => {
-        btn.addEventListener('click', async (event) => {
-            event.stopPropagation();
-            const id = btn.dataset.id;
-            if (!id) return;
-
-            btn.disabled = true;
-            btn.textContent = 'Joining...';
-            try {
-                const response = await window.NexusAuth.apiFetch('/subjects/' + encodeURIComponent(id) + '/join', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-
-                if (response.status === 401) {
-                    forceLogout();
-                    return;
-                }
-
-                if (response.ok) {
-                    myMembershipSubjectIds.add(String(id));
-                    renderSubjectCards(subjects);
-                } else {
-                    btn.textContent = 'Join';
-                }
-            } catch (err) {
-                btn.textContent = 'Join';
-            } finally {
-                btn.disabled = false;
+    container.querySelectorAll('.repo-item').forEach((item) => {
+        item.addEventListener('click', () => {
+            const id = item.dataset.id;
+            const name = item.dataset.name;
+            if (id) {
+                openSubject(id, name);
             }
         });
     });
 
-    container.querySelectorAll('[data-action="leave"]').forEach((btn) => {
+    container.querySelectorAll('[data-action]').forEach((btn) => {
         btn.addEventListener('click', async (event) => {
             event.stopPropagation();
+
+            const action = btn.dataset.action;
             const id = btn.dataset.id;
             if (!id) return;
 
-            btn.disabled = true;
-            btn.textContent = 'Leaving...';
-            try {
-                const response = await window.NexusAuth.apiFetch('/subjects/' + encodeURIComponent(id) + '/join', {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' }
-                });
+            if (action === 'open') {
+                openSubject(id, btn.dataset.name || 'Subject');
+                return;
+            }
 
-                if (response.status === 401) {
-                    forceLogout();
-                    return;
-                }
+            if (action === 'manage') {
+                openSubjectManage(id);
+                return;
+            }
 
-                if (response.ok) {
-                    myMembershipSubjectIds.delete(String(id));
-                    renderSubjectCards(subjects);
-                } else {
-                    btn.textContent = 'Leave';
+            if (action === 'join') {
+                btn.disabled = true;
+                const prevText = btn.textContent;
+                btn.textContent = 'Joining...';
+                try {
+                    const response = await window.NexusAuth.apiFetch('/subjects/' + encodeURIComponent(id) + '/join', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    if (response.status === 401) {
+                        forceLogout();
+                        return;
+                    }
+
+                    if (response.ok) {
+                        myMembershipSubjectIds.add(String(id));
+                        renderSubjectSections(allSubjects);
+                        showToast('Joined subject base.', 'success');
+                    } else {
+                        showToast('Unable to join this subject base.', 'error');
+                        btn.textContent = prevText;
+                    }
+                } finally {
+                    btn.disabled = false;
                 }
-            } catch (err) {
-                btn.textContent = 'Leave';
-            } finally {
-                btn.disabled = false;
+                return;
+            }
+
+            if (action === 'leave') {
+                btn.disabled = true;
+                const prevText = btn.textContent;
+                btn.textContent = 'Leaving...';
+                try {
+                    const response = await window.NexusAuth.apiFetch('/subjects/' + encodeURIComponent(id) + '/join', {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    if (response.status === 401) {
+                        forceLogout();
+                        return;
+                    }
+
+                    if (response.ok) {
+                        myMembershipSubjectIds.delete(String(id));
+                        renderSubjectSections(allSubjects);
+                        showToast('Left subject base.', 'info');
+                    } else {
+                        showToast('Unable to leave this subject base.', 'error');
+                        btn.textContent = prevText;
+                    }
+                } finally {
+                    btn.disabled = false;
+                }
             }
         });
     });
+}
+
+function renderSubjectSections(subjects) {
+    const mine = subjects.filter((s) => isCreatorOf(s));
+    const joined = subjects.filter((s) => {
+        const id = String(s._id || '');
+        return id && myMembershipSubjectIds.has(id) && !isCreatorOf(s);
+    });
+    const explore = subjects.filter((s) => {
+        const id = String(s._id || '');
+        if (!id) return false;
+        if (isCreatorOf(s)) return false;
+        if (myMembershipSubjectIds.has(id)) return false;
+        return getVisibility(s) === 'PUBLIC';
+    });
+
+    document.getElementById('mySubjectsCount').textContent = String(mine.length);
+    document.getElementById('joinedSubjectsCount').textContent = String(joined.length);
+    document.getElementById('exploreSubjectsCount').textContent = String(explore.length);
+
+    renderSubjectList('mySubjectsList', mine, 'mine');
+    renderSubjectList('joinedSubjectsList', joined, 'joined');
+    renderSubjectList('exploreSubjectsList', explore, 'explore');
 }
 
 function renderTechTrends(trends) {
@@ -761,10 +864,11 @@ function renderTechTrends(trends) {
     }
 
     container.innerHTML = trends.map((trend) => {
-        const title = trend.title || 'Untitled trend';
-        const summary = trend.summary ? '<span class="muted">' + trend.summary + '</span>' : '';
-        if (trend.url) {
-            return '<div class="list-item"><strong><a href="' + trend.url + '" target="_blank" rel="noopener noreferrer">' + title + '</a></strong>' + summary + '</div>';
+        const title = escapeHtml(trend.title || 'Untitled trend');
+        const summary = trend.summary ? '<span class="muted">' + escapeHtml(trend.summary) + '</span>' : '';
+        const safeUrl = sanitizeHttpUrl(trend.url || '');
+        if (safeUrl) {
+            return '<div class="list-item"><strong><a class="trend-link" href="' + safeUrl + '" target="_blank" rel="noopener noreferrer">' + title + '</a></strong>' + summary + '</div>';
         }
         return '<div class="list-item"><strong>' + title + '</strong>' + summary + '</div>';
     }).join('');
@@ -797,11 +901,14 @@ async function loadSubjects() {
 
         const data = await window.NexusAuth.parseJsonSafe(response);
         allSubjects = Array.isArray(data) ? data : [];
-        renderSubjectCards(allSubjects);
+        renderSubjectSections(allSubjects);
         updateCounts();
     } catch (err) {
-        document.getElementById('subjectCards').innerHTML = '<div class="error">Failed to load subjects.</div>';
+        document.getElementById('mySubjectsList').innerHTML = '<div class="error">Failed to load subjects.</div>';
+        document.getElementById('joinedSubjectsList').innerHTML = '<div class="error">Failed to load subjects.</div>';
+        document.getElementById('exploreSubjectsList').innerHTML = '<div class="error">Failed to load subjects.</div>';
         document.getElementById('subjectStatus').textContent = 'Load failed';
+        showToast('Failed to load subjects.', 'error');
     }
 }
 
@@ -830,6 +937,7 @@ async function loadTechTrends() {
         updateCounts();
     } catch (err) {
         document.getElementById('techTrendsContainer').innerHTML = '<div class="error">Failed to load trends.</div>';
+        showToast('Failed to load tech trends.', 'error');
     }
 }
 
@@ -858,14 +966,17 @@ async function loadRecentUploads() {
         updateCounts();
     } catch (err) {
         document.getElementById('recentUploads').innerHTML = '<div class="error">Failed to load uploads.</div>';
+        showToast('Failed to load recent uploads.', 'error');
     }
 }
 
 async function initDashboard() {
-    const activeUser = await window.NexusAuth.requireAuth('login.html');
-    if (!activeUser) {
+    const user = await window.NexusAuth.requireAuth('login.html');
+    if (!user) {
         return;
     }
+
+    activeUser = user;
 
     if (activeUser.fullName) {
         document.getElementById('userName').textContent = 'Signed in as ' + activeUser.fullName;

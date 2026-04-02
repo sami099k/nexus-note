@@ -31,6 +31,11 @@ const techTrendSchema = new mongoose.Schema(
     imageUrl: {
       type: String,
       default: ''
+    },
+    postedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null
     }
   },
   {

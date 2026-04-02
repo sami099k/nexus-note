@@ -51,7 +51,7 @@ body {
 .icon-profile { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23c9d1d9' d='M8 8.25A3.25 3.25 0 1 0 8 1.75a3.25 3.25 0 0 0 0 6.5Zm0 1.5c-3.2 0-5.75 1.72-5.75 3.92V15h11.5v-.33c0-2.2-2.55-3.92-5.75-3.92Z'/%3E%3C/svg%3E"); }
 .icon-logout { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23ffb3ad' d='M6.75 1.5A1.75 1.75 0 0 0 5 3.25v1.5a.75.75 0 0 0 1.5 0v-1.5c0-.138.112-.25.25-.25h5.5c.138 0 .25.112.25.25v8.5a.25.25 0 0 1-.25.25h-5.5a.25.25 0 0 1-.25-.25v-1.5a.75.75 0 0 0-1.5 0v1.5A1.75 1.75 0 0 0 6.75 14h5.5A1.75 1.75 0 0 0 14 12.25v-8.5A1.75 1.75 0 0 0 12.25 2h-5.5ZM8.28 5.22a.75.75 0 0 0-1.06 1.06L8.19 7.25H1.75a.75.75 0 0 0 0 1.5h6.44L7.22 9.72a.75.75 0 1 0 1.06 1.06l2.25-2.25a.75.75 0 0 0 0-1.06L8.28 5.22Z'/%3E%3C/svg%3E"); }
 .nav a:hover { background: #222b36; border-color: #2b3542; }
-.nav a.active { background: #1c2d4a; border-color: #2f81f7; color: #ffffff; }
+.nav a.active { background: #1a2f27; border-color: #2f9e6f; color: #ffffff; }
 .pill { min-width: 22px; height: 20px; border-radius: 999px; background: #222b36; border: 1px solid #2f3a48; color: var(--muted); font-size: 0.72rem; display: inline-flex; align-items: center; justify-content: center; padding: 0 7px; }
 .main { padding: 18px 22px 28px; }
 .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
@@ -62,11 +62,16 @@ body {
 .btn { border: 1px solid var(--line); background: #212830; color: var(--text); border-radius: 8px; padding: 9px 12px; font-weight: 600; text-decoration: none; cursor: pointer; }
 .btn:hover { border-color: #3b4552; }
 .btn-danger { background: #2a1f23; border-color: #5b2a2f; color: #ffb3ad; }
+.btn-danger:hover { background: #3a242a; border-color: #84414b; }
 .hero { border: 1px solid var(--line); border-radius: 10px; background: var(--bg-soft); padding: 16px; margin-bottom: 16px; display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
 .hero h1 { font-family: 'Fraunces', serif; font-size: 1.45rem; margin-bottom: 6px; }
 .hero p { color: var(--muted); line-height: 1.5; }
 .profile-card { min-width: 240px; border: 1px solid var(--line-soft); border-radius: 10px; background: #111820; padding: 14px; display: grid; gap: 12px; }
 .avatar { width: 60px; height: 60px; border-radius: 18px; background: linear-gradient(135deg, #2f81f7, #7c3aed); display: grid; place-items: center; font-size: 1.2rem; font-weight: 700; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: none; }
+.avatar.has-image { background: #0d1117; border: 1px solid var(--line-soft); }
+.avatar.has-image img { display: block; }
+.avatar.has-image span { display: none; }
 .profile-meta { display: grid; gap: 4px; }
 .profile-name { font-weight: 700; }
 .profile-email, .profile-role { color: var(--muted); font-size: 0.9rem; }
@@ -109,6 +114,14 @@ body {
             <li><a href="profile.html" class="active"><span class="nav-main"><span class="nav-icon icon-profile"></span><span>My Profile</span></span></a></li>
             <li><a class="logout" href="#" onclick="handleLogout(); return false;"><span class="nav-main"><span class="nav-icon icon-logout"></span><span>Logout</span></span></a></li>
         </ul>
+
+        <div class="nav-group-title">Subject Bases</div>
+        <ul class="nav">
+            <li><a href="home.html#myBases"><span class="nav-main"><span>My Bases</span></span></a></li>
+            <li><a href="home.html#joinedBases"><span class="nav-main"><span>Joined Bases</span></span></a></li>
+            <li><a href="home.html#exploreBases"><span class="nav-main"><span>Explore Public</span></span></a></li>
+            <li><a href="create.html"><span class="nav-main"><span>Create New</span></span></a></li>
+        </ul>
     </aside>
 
     <main class="main">
@@ -127,7 +140,10 @@ body {
             </div>
             <div class="profile-card">
                 <div style="display:flex; gap:12px; align-items:center;">
-                    <div class="avatar" id="avatar">MN</div>
+                    <div class="avatar" id="avatar">
+                        <img id="avatarImg" alt="" />
+                        <span id="avatarText">MN</span>
+                    </div>
                     <div class="profile-meta">
                         <div class="profile-name" id="profileName">Loading...</div>
                         <div class="profile-email" id="profileEmail">Loading...</div>
@@ -251,7 +267,23 @@ function renderProfile(user) {
     document.getElementById('profileName').textContent = name;
     document.getElementById('profileEmail').textContent = user.email || '-';
     document.getElementById('profileRole').textContent = user.role || '-';
-    document.getElementById('avatar').textContent = initialsFromName(name);
+    const avatarWrap = document.getElementById('avatar');
+    const avatarImg = document.getElementById('avatarImg');
+    const avatarText = document.getElementById('avatarText');
+    const initials = initialsFromName(name);
+
+    if (avatarText) {
+        avatarText.textContent = initials;
+    }
+
+    const url = user.avatarUrl ? String(user.avatarUrl).trim() : '';
+    if (url && avatarImg && avatarWrap) {
+        avatarImg.src = url;
+        avatarWrap.classList.add('has-image');
+    } else if (avatarWrap) {
+        avatarWrap.classList.remove('has-image');
+        if (avatarImg) avatarImg.removeAttribute('src');
+    }
     document.getElementById('memberSince').textContent = 'Member since ' + formatDate(user.createdAt);
     document.getElementById('summaryRole').textContent = user.role || '-';
     document.getElementById('summarySubjects').textContent = '0';

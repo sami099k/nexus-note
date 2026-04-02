@@ -14,11 +14,51 @@ const { RESOURCE_STATUS, RESOURCE_TYPES } = require('./constants')
 
 const DEFAULT_SEED_USER_EMAIL = 'seed@nexusnotes.local'
 
+const makeAvatarUrl = (seed) => {
+  const safeSeed = encodeURIComponent(String(seed || 'nexus-user').trim() || 'nexus-user')
+  return `https://api.dicebear.com/7.x/identicon/svg?seed=${safeSeed}`
+}
+
+const pickTechPhotoUrl = (value, tags = []) => {
+  const text = String(value || '').toLowerCase()
+  const normalizedTags = (Array.isArray(tags) ? tags : []).map((t) => String(t || '').toLowerCase())
+
+  const has = (...needles) => needles.some((n) => text.includes(n) || normalizedTags.includes(n))
+
+  const imageByTopic = {
+    ai: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1400&q=80',
+    database: 'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?auto=format&fit=crop&w=1400&q=80',
+    web: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1400&q=80',
+    cloud: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1400&q=80',
+    backend: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1400&q=80',
+    security: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1400&q=80',
+    systems: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1400&q=80',
+    network: 'https://images.unsplash.com/photo-1520869562399-e772f042f422?auto=format&fit=crop&w=1400&q=80',
+    default: 'https://images.unsplash.com/photo-1518773553398-650c184e0bb3?auto=format&fit=crop&w=1400&q=80'
+  }
+
+  let topic = 'default'
+  if (has('ai', 'machine', 'agent', 'llm')) topic = 'ai'
+  else if (has('mongodb', 'database', 'db')) topic = 'database'
+  else if (has('react', 'web', 'frontend')) topic = 'web'
+  else if (has('cloud', 'aws', 'kubernetes', 'devops')) topic = 'cloud'
+  else if (has('http', 'backend', 'api', 'server')) topic = 'backend'
+  else if (has('security', 'cyber')) topic = 'security'
+  else if (has('system design', 'caching', 'cache')) topic = 'systems'
+  else if (has('network', 'tcp', 'dns')) topic = 'network'
+
+  return imageByTopic[topic] || imageByTopic.default
+}
+
 const ensureSeedUser = async () => {
   const email = String(process.env.SEED_USER_EMAIL || DEFAULT_SEED_USER_EMAIL).trim().toLowerCase()
 
   const existing = await User.findOne({ email })
   if (existing) {
+    if (!existing.avatarUrl) {
+      existing.avatarUrl = makeAvatarUrl(email)
+      await existing.save()
+    }
     return existing
   }
 
@@ -30,6 +70,7 @@ const ensureSeedUser = async () => {
     email,
     passwordHash,
     role: 'USER',
+    avatarUrl: makeAvatarUrl(email),
     isActive: false
   })
 }
@@ -65,6 +106,31 @@ const ensureSubjects = async (createdBy) => {
       name: 'Computer Networks',
       code: 'CN',
       description: 'Networking foundations: TCP/IP, HTTP, DNS, routing, and troubleshooting.'
+    },
+    {
+      name: 'System Design',
+      code: 'SYS',
+      description: 'Scalable architecture, reliability, caching, queues, and distributed systems tradeoffs.'
+    },
+    {
+      name: 'Software Engineering',
+      code: 'SWE',
+      description: 'Engineering practices: testing, clean code, code reviews, CI/CD, and maintainability.'
+    },
+    {
+      name: 'DevOps and Cloud',
+      code: 'DEVOPS',
+      description: 'Containers, deployment pipelines, cloud services, observability, and automation workflows.'
+    },
+    {
+      name: 'Cybersecurity Fundamentals',
+      code: 'SEC',
+      description: 'Security basics including threat modeling, auth hardening, and secure engineering habits.'
+    },
+    {
+      name: 'Object-Oriented Design Patterns',
+      code: 'OOD',
+      description: 'Design principles, OOP modeling, and practical design patterns for real projects.'
     }
   ]
 
@@ -87,27 +153,25 @@ const ensureSubjects = async (createdBy) => {
   return ensured
 }
 
-const seedTechTrends = async () => {
+const seedTechTrends = async (seedUser) => {
   const count = await TechTrend.countDocuments()
   if (count > 0) {
-    const missing = await TechTrend.find({ $or: [{ imageUrl: { $exists: false } }, { imageUrl: '' }] })
+    const missing = await TechTrend.find({
+      $or: [
+        { imageUrl: { $exists: false } },
+        { imageUrl: '' },
+        { imageUrl: /source\.unsplash\.com\/featured/i },
+        { imageUrl: /picsum\.photos/i }
+      ]
+    })
       .sort({ publishedAt: -1 })
-      .limit(12)
 
     if (missing.length === 0) {
       return
     }
 
-    const toSeedKey = (value) =>
-      String(value || '')
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '')
-        .slice(0, 40) || crypto.randomBytes(6).toString('hex')
-
     for (const item of missing) {
-      const seedKey = toSeedKey(item.title)
-      item.imageUrl = `https://picsum.photos/seed/${seedKey}/900/420`
+      item.imageUrl = pickTechPhotoUrl(item.title, item.domainTags)
       await item.save()
     }
 
@@ -120,7 +184,7 @@ const seedTechTrends = async () => {
       title: 'AI agents: practical patterns for real apps',
       summary: 'Where agents help (workflow automation, search+tools) and where they don’t (deterministic business logic).',
       url: 'https://example.com/ai-agents-patterns',
-      imageUrl: 'https://picsum.photos/seed/nexus-agents/900/420',
+      imageUrl: pickTechPhotoUrl('ai agents', ['ai']),
       domainTags: ['AI', 'Productivity'],
       source: 'EXTERNAL',
       publishedAt: new Date(now - 1000 * 60 * 60 * 24 * 2)
@@ -129,7 +193,7 @@ const seedTechTrends = async () => {
       title: 'MongoDB indexing checklist for API performance',
       summary: 'Use compound indexes, validate query plans, and avoid unbounded regex queries.',
       url: 'https://example.com/mongodb-indexing',
-      imageUrl: 'https://picsum.photos/seed/nexus-mongo/900/420',
+      imageUrl: pickTechPhotoUrl('mongodb indexing', ['mongodb', 'database']),
       domainTags: ['DB', 'MongoDB'],
       source: 'EXTERNAL',
       publishedAt: new Date(now - 1000 * 60 * 60 * 12)
@@ -138,7 +202,7 @@ const seedTechTrends = async () => {
       title: 'React UI: accessibility-first component habits',
       summary: 'Focus states, keyboard navigation, aria labels, and reducing motion for usability.',
       url: 'https://example.com/react-a11y',
-      imageUrl: 'https://picsum.photos/seed/nexus-react/900/420',
+      imageUrl: pickTechPhotoUrl('react accessibility', ['react', 'web']),
       domainTags: ['Web', 'React'],
       source: 'EXTERNAL',
       publishedAt: new Date(now - 1000 * 60 * 60 * 30)
@@ -147,7 +211,7 @@ const seedTechTrends = async () => {
       title: 'System design: caching strategies that actually ship',
       summary: 'Cache keys, invalidation, and when to use TTL vs event-driven expiry.',
       url: 'https://example.com/system-design-caching',
-      imageUrl: 'https://picsum.photos/seed/nexus-caching/900/420',
+      imageUrl: pickTechPhotoUrl('system design caching', ['cloud']),
       domainTags: ['System Design', 'Cloud'],
       source: 'EXTERNAL',
       publishedAt: new Date(now - 1000 * 60 * 60 * 40)
@@ -156,7 +220,7 @@ const seedTechTrends = async () => {
       title: 'HTTP fundamentals: what every backend should know',
       summary: 'Retries, idempotency, status codes, and safe request/response logging.',
       url: 'https://example.com/http-fundamentals',
-      imageUrl: 'https://picsum.photos/seed/nexus-http/900/420',
+      imageUrl: pickTechPhotoUrl('http api backend', ['backend', 'api']),
       domainTags: ['Web', 'Backend'],
       source: 'EXTERNAL',
       publishedAt: new Date(now - 1000 * 60 * 60 * 60)
@@ -165,10 +229,11 @@ const seedTechTrends = async () => {
       title: 'Internal: weekly engineering learning digest',
       summary: 'Short notes on what the team learned building NexusNotes this week.',
       url: '',
-      imageUrl: 'https://picsum.photos/seed/nexus-internal/900/420',
+      imageUrl: pickTechPhotoUrl('internal engineering', ['internal', 'learning']),
       domainTags: ['INTERNAL', 'Learning'],
       source: 'INTERNAL',
-      publishedAt: new Date(now - 1000 * 60 * 60 * 6)
+      publishedAt: new Date(now - 1000 * 60 * 60 * 6),
+      postedBy: seedUser ? seedUser._id : null
     }
   ])
 }
@@ -271,6 +336,56 @@ const seedSubjectRoomData = async ({ subject, author }) => {
         {
           title: 'DNS troubleshooting playbook',
           body: 'Steps you follow when a domain is not resolving or resolves intermittently.'
+        }
+      ],
+      SYS: [
+        {
+          title: 'How do you structure a URL shortener design interview?',
+          body: 'Cover requirements, high-level design, bottlenecks, and scaling strategy with concrete numbers.'
+        },
+        {
+          title: 'Cache invalidation: practical patterns',
+          body: 'Compare TTL, write-through, write-behind, and event-driven invalidation with examples.'
+        }
+      ],
+      SWE: [
+        {
+          title: 'How do you decide what to unit test?',
+          body: 'Share heuristics for high-value tests, mocking boundaries, and avoiding brittle test suites.'
+        },
+        {
+          title: 'Code review checklist your team actually follows',
+          body: 'What checks catch the most bugs: correctness, readability, security, and performance.'
+        }
+      ],
+      DEVOPS: [
+        {
+          title: 'CI pipeline design for small teams',
+          body: 'How to keep build/test/deploy fast while still enforcing quality gates and rollback safety.'
+        },
+        {
+          title: 'Kubernetes basics: what to learn first?',
+          body: 'Pods, deployments, services, probes, and config maps: suggest a practical learning order.'
+        }
+      ],
+      SEC: [
+        {
+          title: 'Common auth vulnerabilities in web apps',
+          body: 'Discuss weak JWT handling, session fixation, missing rate limits, and insecure password reset flows.'
+        },
+        {
+          title: 'Threat modeling for a student project',
+          body: 'How to identify assets, attack paths, and mitigation priorities without overcomplicating it.'
+        }
+      ],
+      OOD: [
+        {
+          title: 'When should you use Strategy vs Factory?',
+          body: 'Compare intent, tradeoffs, and anti-patterns with real code scenarios.'
+        },
+        {
+          title: 'Applying SOLID without over-engineering',
+          body: 'Share refactoring steps that improve design while keeping the codebase simple.'
         }
       ]
     }
@@ -452,7 +567,7 @@ const seedDefaults = async () => {
   const seedUser = await ensureSeedUser()
   const subjects = await ensureSubjects(seedUser)
 
-  await seedTechTrends()
+  await seedTechTrends(seedUser)
 
   for (const subject of subjects) {
     // Seed subject room data (threads, replies, notes, interview questions, roadmaps).

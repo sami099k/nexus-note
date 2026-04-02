@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema(
         ref: 'Subject'
       }
     ],
+    avatarUrl: {
+      type: String,
+      default: ''
+    },
     isActive: {
       type: Boolean,
       default: true

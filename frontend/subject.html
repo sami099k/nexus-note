@@ -20,6 +20,8 @@
     --muted: #9198a1;
     --accent: #2f81f7;
     --accent-soft: #1b2f4a;
+    --success: #3fb950;
+    --warning: #d29922;
     --danger: #f85149;
 }
 
@@ -115,8 +117,8 @@ body {
 }
 
 .nav a.active {
-    background: #1c2d4a;
-    border-color: #2f81f7;
+    background: #1a2f27;
+    border-color: #2f9e6f;
     color: #ffffff;
 }
 .nav a.logout {
@@ -201,6 +203,11 @@ body {
     color: #ffb3ad;
 }
 
+.btn-danger:hover {
+    background: #3a242a;
+    border-color: #84414b;
+}
+
 .hero {
     border: 1px solid var(--line);
     border-radius: 10px;
@@ -251,6 +258,24 @@ body {
     color: var(--muted);
     padding: 5px 9px;
     font-size: 0.8rem;
+}
+
+.badge-difficulty-easy {
+    border-color: #2f9e6f;
+    background: #112a22;
+    color: #dff9ee;
+}
+
+.badge-difficulty-medium {
+    border-color: #8a6a2a;
+    background: #2d2514;
+    color: #f5ddb0;
+}
+
+.badge-difficulty-hard {
+    border-color: #84414b;
+    background: #2a1f23;
+    color: #ffccd1;
 }
 
 .grid {
@@ -365,6 +390,51 @@ body {
     color: var(--muted);
 }
 
+.question-toggle {
+    width: 100%;
+    text-align: left;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    padding: 0;
+    cursor: pointer;
+}
+
+.question-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.question-chevron {
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.2;
+    padding-top: 2px;
+}
+
+.question-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.answer-panel {
+    border-top: 1px solid var(--line-soft);
+    margin-top: 8px;
+    padding-top: 8px;
+    color: #c9d1d9;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    word-break: break-word;
+}
+
+.answer-hidden {
+    display: none;
+}
+
 .row {
     display: flex;
     justify-content: space-between;
@@ -435,6 +505,14 @@ body {
             <li><a href="tech-feed.html"><span class="nav-main"><span class="nav-icon icon-feed"></span><span>Tech Feed</span></span></a></li>
             <li><a href="profile.html"><span class="nav-main"><span class="nav-icon icon-profile"></span><span>My Profile</span></span></a></li>
             <li><a class="logout" href="#" onclick="handleLogout(); return false;"><span class="nav-main"><span class="nav-icon icon-logout"></span><span>Logout</span></span></a></li>
+        </ul>
+
+        <div class="nav-group-title">Subject Bases</div>
+        <ul class="nav">
+            <li><a href="home.html#myBases"><span class="nav-main"><span>My Bases</span></span></a></li>
+            <li><a href="home.html#joinedBases"><span class="nav-main"><span>Joined Bases</span></span></a></li>
+            <li><a href="home.html#exploreBases"><span class="nav-main"><span>Explore Public</span></span></a></li>
+            <li><a href="create.html"><span class="nav-main"><span>Create New</span></span></a></li>
         </ul>
     </aside>
 
@@ -531,6 +609,41 @@ body {
                     </div>
                 </div>
             </section>
+
+            <section class="card" id="manageCard" style="display:none;">
+                <div class="card-header">
+                    <h2 class="card-title">Manage Subject Base</h2>
+                    <span class="card-count">Creator/Admin</span>
+                </div>
+                <div class="card-body">
+                    <div class="field">
+                        <label for="manageName">Name</label>
+                        <input id="manageName" class="input" placeholder="Subject name" />
+                    </div>
+                    <div class="field">
+                        <label for="manageCode">Code</label>
+                        <input id="manageCode" class="input" placeholder="Code" />
+                    </div>
+                    <div class="field">
+                        <label for="manageVisibility">Visibility</label>
+                        <select id="manageVisibility" class="input">
+                            <option value="PUBLIC">Public</option>
+                            <option value="PRIVATE">Private</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="manageDescription">Description</label>
+                        <textarea id="manageDescription" class="textarea" placeholder="Description"></textarea>
+                    </div>
+
+                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:12px;">
+                        <button class="btn btn-primary" id="manageSaveBtn" type="button">Save</button>
+                        <button class="btn btn-danger" id="manageDeleteBtn" type="button">Delete</button>
+                        <span class="card-count" id="manageStatus"></span>
+                    </div>
+                    <div class="card-count" style="margin-top:10px;">Private subjects are visible only to you (and privileged admins).</div>
+                </div>
+            </section>
         </section>
     </main>
 </div>
@@ -547,6 +660,8 @@ let cachedMySubjectIds = new Set();
 
 let isMember = false;
 let hubMetrics = null;
+let hubSubject = null;
+let expandedQuestionId = null;
 
 function handleLogout() {
     if (window.NexusAuth && typeof window.NexusAuth.logout === 'function') {
@@ -556,7 +671,18 @@ function handleLogout() {
 }
 
 function escapeHtml(value) {
-    return String(value || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function showToast(message, type) {
+    if (window.NexusAuth && typeof window.NexusAuth.showToast === 'function') {
+        window.NexusAuth.showToast(message, type || 'info');
+    }
 }
 
 function getLastSubjectId() {
@@ -789,7 +915,7 @@ async function downloadResource(resourceId) {
         a.remove();
         window.URL.revokeObjectURL(url);
     } catch (err) {
-        alert('Unable to download resource right now.');
+        showToast('Unable to download resource right now.', 'error');
     }
 }
 
@@ -812,6 +938,118 @@ async function loadHub() {
     }
 
     return window.NexusAuth.parseJsonSafe(response);
+}
+
+function canManageSubject(subject, session) {
+    if (!subject || !session) return false;
+    if (session.role === 'OWNER') return true;
+    if (String(subject.createdBy || '') === String(session.id || '')) return true;
+    if (session.role === 'SUBJECT_ADMIN' && Array.isArray(session.assignedSubjectIds)) {
+        return session.assignedSubjectIds.map(String).includes(String(subjectId));
+    }
+    return false;
+}
+
+function showManagePanel(subject, session) {
+    const card = document.getElementById('manageCard');
+    if (!card) return;
+
+    if (!canManageSubject(subject, session)) {
+        card.style.display = 'none';
+        return;
+    }
+
+    card.style.display = 'block';
+    document.getElementById('manageName').value = subject.name || '';
+    document.getElementById('manageCode').value = subject.code || '';
+    document.getElementById('manageDescription').value = subject.description || '';
+    document.getElementById('manageVisibility').value = (subject.visibility || 'PUBLIC').toUpperCase();
+
+    const saveBtn = document.getElementById('manageSaveBtn');
+    const deleteBtn = document.getElementById('manageDeleteBtn');
+
+    if (saveBtn && !saveBtn.dataset.wired) {
+        saveBtn.dataset.wired = '1';
+        saveBtn.addEventListener('click', async () => {
+            const status = document.getElementById('manageStatus');
+            status.textContent = 'Saving...';
+            saveBtn.disabled = true;
+
+            try {
+                const payload = {
+                    name: String(document.getElementById('manageName').value || '').trim(),
+                    code: String(document.getElementById('manageCode').value || '').trim(),
+                    description: String(document.getElementById('manageDescription').value || '').trim(),
+                    visibility: String(document.getElementById('manageVisibility').value || 'PUBLIC').toUpperCase()
+                };
+
+                const response = await window.NexusAuth.apiFetch('/subjects/' + encodeURIComponent(subjectId), {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.status === 401) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                const data = await window.NexusAuth.parseJsonSafe(response);
+                if (!response.ok) {
+                    status.textContent = (data && data.message) ? data.message : 'Save failed.';
+                    return;
+                }
+
+                hubSubject = data;
+                document.getElementById('subjectName').textContent = data.name || 'Subject Workspace';
+                document.getElementById('subjectSubtitle').textContent = data.description || 'Join this subject room to access discussions and notes.';
+                status.textContent = 'Saved.';
+            } finally {
+                saveBtn.disabled = false;
+                setTimeout(() => {
+                    const status = document.getElementById('manageStatus');
+                    if (status && status.textContent === 'Saved.') {
+                        status.textContent = '';
+                    }
+                }, 1500);
+            }
+        });
+    }
+
+    if (deleteBtn && !deleteBtn.dataset.wired) {
+        deleteBtn.dataset.wired = '1';
+        deleteBtn.addEventListener('click', async () => {
+            if (!window.confirm('Delete this subject base? This cannot be undone.')) {
+                return;
+            }
+
+            const status = document.getElementById('manageStatus');
+            status.textContent = 'Deleting...';
+            deleteBtn.disabled = true;
+
+            try {
+                const response = await window.NexusAuth.apiFetch('/subjects/' + encodeURIComponent(subjectId), {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.status === 401) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                if (!response.ok) {
+                    const data = await window.NexusAuth.parseJsonSafe(response);
+                    status.textContent = (data && data.message) ? data.message : 'Delete failed.';
+                    return;
+                }
+
+                window.location.href = 'home.html';
+            } finally {
+                deleteBtn.disabled = false;
+            }
+        });
+    }
 }
 
 async function loadMembership() {
@@ -845,23 +1083,59 @@ async function loadRoomData() {
 function renderFamousQuestions(items) {
     const container = document.getElementById('questionsContainer');
     if (!items.length) {
+        expandedQuestionId = null;
         container.innerHTML = '<div class="placeholder">No interview questions yet.</div>';
         return;
     }
 
-    container.innerHTML = items.slice(0, 6).map((item) => {
-        const q = String(item.question || 'Question').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        const a = String(item.answer || '').trim();
-        const snippet = a.length > 160 ? a.slice(0, 160) + '…' : a;
-        const difficulty = item.difficulty ? String(item.difficulty) : '';
-        const meta = [difficulty, item.isVerified ? 'Verified' : ''].filter(Boolean).join(' · ');
+    const visibleItems = items.slice(0, 6);
+    const visibleIds = new Set(visibleItems.map((item, idx) => String(item && item._id ? item._id : 'question-' + idx)));
+    if (expandedQuestionId && !visibleIds.has(expandedQuestionId)) {
+        expandedQuestionId = null;
+    }
+
+    container.innerHTML = visibleItems.map((item, idx) => {
+        const itemId = String(item && item._id ? item._id : 'question-' + idx);
+        const q = escapeHtml(item && item.question ? item.question : 'Question');
+        const answerText = String(item && item.answer ? item.answer : '').trim();
+        const answer = answerText ? escapeHtml(answerText) : 'No answer added yet.';
+
+        const rawDifficulty = String(item && item.difficulty ? item.difficulty : 'MEDIUM').toUpperCase();
+        const difficulty = ['EASY', 'MEDIUM', 'HARD'].includes(rawDifficulty) ? rawDifficulty : 'MEDIUM';
+        const difficultyClass = difficulty === 'EASY'
+            ? 'badge-difficulty-easy'
+            : (difficulty === 'HARD' ? 'badge-difficulty-hard' : 'badge-difficulty-medium');
+
+        const panelId = 'answer-panel-' + itemId.replace(/[^a-zA-Z0-9_-]/g, '-');
+        const isOpen = expandedQuestionId === itemId;
+        const verified = item && item.isVerified ? '<span class="badge">Verified</span>' : '';
 
         return '<div class="resource">'
+            + '<button type="button" class="question-toggle" data-question-id="' + escapeHtml(itemId) + '" aria-expanded="' + (isOpen ? 'true' : 'false') + '" aria-controls="' + escapeHtml(panelId) + '">'
+            + '<div class="question-top">'
             + '<div class="resource-title">' + q + '</div>'
-            + (meta ? '<div class="resource-meta">' + meta + '</div>' : '')
-            + (snippet ? '<div class="resource-meta">' + snippet.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>' : '')
+            + '<span class="question-chevron">' + (isOpen ? '▾' : '▸') + '</span>'
+            + '</div>'
+            + '<div class="question-tags">'
+            + '<span class="badge ' + difficultyClass + '">' + difficulty + '</span>'
+            + verified
+            + '</div>'
+            + '</button>'
+            + '<div id="' + escapeHtml(panelId) + '" class="answer-panel ' + (isOpen ? '' : 'answer-hidden') + '" role="region">' + answer + '</div>'
             + '</div>';
     }).join('');
+
+    container.querySelectorAll('.question-toggle').forEach((button) => {
+        button.addEventListener('click', () => {
+            const id = String(button.dataset.questionId || '');
+            if (!id) {
+                return;
+            }
+
+            expandedQuestionId = expandedQuestionId === id ? null : id;
+            renderFamousQuestions(visibleItems);
+        });
+    });
 }
 
 async function loadFamousQuestions() {
@@ -876,6 +1150,7 @@ async function loadFamousQuestions() {
 
     if (response.status === 403) {
         document.getElementById('questionsContainer').innerHTML = '<div class="placeholder">Join to view interview questions.</div>';
+        expandedQuestionId = null;
         return;
     }
 
@@ -1039,7 +1314,12 @@ async function joinCurrentSubject() {
             isMember = true;
             setMembershipUi();
             await loadRoomData();
+            showToast('Joined subject room.', 'success');
+            return;
         }
+
+        const data = await window.NexusAuth.parseJsonSafe(response);
+        showToast((data && data.message) ? data.message : 'Unable to join room right now.', 'error');
     } finally {
         btn.disabled = false;
         btn.textContent = 'Join Room';
@@ -1065,7 +1345,12 @@ async function leaveCurrentSubject() {
             isMember = false;
             setMembershipUi();
             await loadRoomData();
+            showToast('Left subject room.', 'info');
+            return;
         }
+
+        const data = await window.NexusAuth.parseJsonSafe(response);
+        showToast((data && data.message) ? data.message : 'Unable to leave room right now.', 'error');
     } finally {
         btn.disabled = false;
         btn.textContent = 'Leave Room';
@@ -1084,6 +1369,7 @@ async function createThread() {
     statusEl.textContent = '';
     if (!title) {
         statusEl.textContent = 'Title is required.';
+        showToast('Thread title is required.', 'warning');
         return;
     }
 
@@ -1104,12 +1390,14 @@ async function createThread() {
 
         if (response.status === 403) {
             statusEl.textContent = 'Join this room to post.';
+            showToast('Join this room to post.', 'warning');
             return;
         }
 
         if (!response.ok) {
             const data = await window.NexusAuth.parseJsonSafe(response);
             statusEl.textContent = (data && data.message) ? data.message : 'Unable to post right now.';
+            showToast(statusEl.textContent, 'error');
             return;
         }
 
@@ -1117,6 +1405,7 @@ async function createThread() {
         bodyEl.value = '';
         statusEl.textContent = 'Posted.';
         await loadThreads();
+        showToast('Thread posted.', 'success');
     } finally {
         buttonEl.disabled = false;
         buttonEl.textContent = 'Post';
@@ -1166,8 +1455,10 @@ async function initSubjectPage() {
 
     const hub = await loadHub();
     if (hub && hub.subject) {
+        hubSubject = hub.subject;
         document.getElementById('subjectName').textContent = hub.subject.name || subjectName;
         document.getElementById('subjectSubtitle').textContent = hub.subject.description || 'Join this subject room to access discussions and notes.';
+        showManagePanel(hub.subject, session);
     }
 
     hubMetrics = hub && hub.metrics ? hub.metrics : null;

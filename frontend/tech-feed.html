@@ -51,10 +51,10 @@ body {
 .icon-profile { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23c9d1d9' d='M8 8.25A3.25 3.25 0 1 0 8 1.75a3.25 3.25 0 0 0 0 6.5Zm0 1.5c-3.2 0-5.75 1.72-5.75 3.92V15h11.5v-.33c0-2.2-2.55-3.92-5.75-3.92Z'/%3E%3C/svg%3E"); }
 .icon-logout { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23ffb3ad' d='M6.75 1.5A1.75 1.75 0 0 0 5 3.25v1.5a.75.75 0 0 0 1.5 0v-1.5c0-.138.112-.25.25-.25h5.5c.138 0 .25.112.25.25v8.5a.25.25 0 0 1-.25.25h-5.5a.25.25 0 0 1-.25-.25v-1.5a.75.75 0 0 0-1.5 0v1.5A1.75 1.75 0 0 0 6.75 14h5.5A1.75 1.75 0 0 0 14 12.25v-8.5A1.75 1.75 0 0 0 12.25 2h-5.5ZM8.28 5.22a.75.75 0 0 0-1.06 1.06L8.19 7.25H1.75a.75.75 0 0 0 0 1.5h6.44L7.22 9.72a.75.75 0 1 0 1.06 1.06l2.25-2.25a.75.75 0 0 0 0-1.06L8.28 5.22Z'/%3E%3C/svg%3E"); }
 .nav a:hover { background: #222b36; border-color: #2b3542; }
-.nav a.active { background: #1c2d4a; border-color: #2f81f7; color: #ffffff; }
+.nav a.active { background: #1a2f27; border-color: #2f9e6f; color: #ffffff; }
 .pill { min-width: 22px; height: 20px; border-radius: 999px; background: #222b36; border: 1px solid #2f3a48; color: var(--muted); font-size: 0.72rem; display: inline-flex; align-items: center; justify-content: center; padding: 0 7px; }
 .main { padding: 18px 18px 28px; }
-.topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+.topbar { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
 .top-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .user-badge { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: #121821; border-radius: 999px; padding: 6px 10px; color: var(--muted); font-size: 0.84rem; max-width: 300px; text-decoration: none; }
 .user-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); flex-shrink: 0; }
@@ -62,6 +62,7 @@ body {
 .btn { border: 1px solid var(--line); background: #212830; color: var(--text); border-radius: 8px; padding: 9px 12px; font-weight: 600; text-decoration: none; cursor: pointer; }
 .btn:hover { border-color: #3b4552; }
 .btn-danger { background: #2a1f23; border-color: #5b2a2f; color: #ffb3ad; }
+.btn-danger:hover { background: #3a242a; border-color: #84414b; }
 .hero { border: 1px solid var(--line); border-radius: 12px; background: var(--bg-soft); padding: 16px; margin-bottom: 14px; }
 .hero h1 { font-family: 'Fraunces', serif; font-size: 1.45rem; margin-bottom: 6px; }
 .hero p { color: var(--muted); line-height: 1.5; }
@@ -70,7 +71,7 @@ body {
 .search:focus { border-color: var(--accent); }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .chip { border: 1px solid var(--line); background: #111820; color: var(--muted); border-radius: 999px; padding: 6px 10px; cursor: pointer; }
-.chip.active { border-color: var(--accent); color: #d7e8ff; background: #10233d; }
+.chip.active { border-color: #2f9e6f; color: #c9f5e3; background: #112a22; }
 .feed-layout { display: grid; grid-template-columns: 1fr; gap: 12px; }
 .feed-toolbar { display: flex; justify-content: space-between; gap: 10px; align-items: center; flex-wrap: wrap; }
 .section-card { border: 1px solid var(--line); border-radius: 10px; background: var(--bg-soft); }
@@ -79,15 +80,23 @@ body {
 .card-body { padding: 12px 14px; }
 .feed-list { display: grid; gap: 10px; }
 .tweet { border: 1px solid var(--line-soft); border-radius: 12px; background: #111820; padding: 12px; display: grid; gap: 10px; }
-.tweet-image { width: 100%; border-radius: 10px; border: 1px solid var(--line-soft); background: #0d1117; aspect-ratio: 16 / 9; object-fit: cover; }
-.tweet-top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
-.tweet-title { font-weight: 700; line-height: 1.35; }
+.tweet-author { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.author-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.avatar-wrap { width: 40px; height: 40px; border-radius: 999px; border: 1px solid var(--line-soft); background: #0d1117; display: grid; place-items: center; overflow: hidden; flex-shrink: 0; }
+.avatar-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.avatar-fallback { font-weight: 700; color: #c9d1d9; font-size: 0.9rem; }
+.author-meta { display: grid; gap: 2px; min-width: 0; }
+.author-name { font-weight: 700; font-size: 0.92rem; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.author-handle { color: var(--muted); font-size: 0.82rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tweet-time { color: var(--muted); font-size: 0.82rem; white-space: nowrap; }
+.tweet-image { width: 100%; border-radius: 10px; border: 1px solid var(--line-soft); background: #0d1117; aspect-ratio: 16 / 9; object-fit: cover; }
+.tweet-title { font-weight: 700; line-height: 1.35; }
 .tweet-summary { color: #c7d0da; line-height: 1.5; }
 .tag-row { display: flex; flex-wrap: wrap; gap: 6px; }
 .tag { border: 1px solid #2a3340; color: #9db8d6; background: #101820; border-radius: 999px; padding: 4px 8px; font-size: 0.76rem; }
 .tweet-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.link-btn { border: 1px solid #33517d; background: var(--accent-soft); color: #b9d6ff; border-radius: 8px; padding: 8px 10px; font-size: 0.84rem; text-decoration: none; }
+.link-btn { border: 1px solid #2f9e6f; background: #112a22; color: #c9f5e3; border-radius: 8px; padding: 8px 10px; font-size: 0.84rem; text-decoration: none; }
+.link-btn:hover { border-color: #67c497; color: #e7fff5; }
 .helper-card { border: 1px solid var(--line); border-radius: 10px; background: #111820; padding: 14px; margin-bottom: 12px; }
 .helper-card h3 { font-size: 1rem; margin-bottom: 8px; }
 .helper-card p, .helper-card li { color: var(--muted); line-height: 1.5; }
@@ -116,11 +125,18 @@ body {
             <li><a href="profile.html"><span class="nav-main"><span class="nav-icon icon-profile"></span><span>My Profile</span></span></a></li>
             <li><a class="logout" href="#" onclick="handleLogout(); return false;"><span class="nav-main"><span class="nav-icon icon-logout"></span><span>Logout</span></span></a></li>
         </ul>
+
+        <div class="nav-group-title">Subject Bases</div>
+        <ul class="nav">
+            <li><a href="home.html#myBases"><span class="nav-main"><span>My Bases</span></span></a></li>
+            <li><a href="home.html#joinedBases"><span class="nav-main"><span>Joined Bases</span></span></a></li>
+            <li><a href="home.html#exploreBases"><span class="nav-main"><span>Explore Public</span></span></a></li>
+            <li><a href="create.html"><span class="nav-main"><span>Create New</span></span></a></li>
+        </ul>
     </aside>
 
     <main class="main">
         <div class="topbar">
-            <div></div>
             <div class="top-actions">
                 <a class="user-badge" href="profile.html"><span class="user-dot"></span><span class="user-label" id="userName">Signed in</span></a>
                 <a class="btn" href="home.html">Back to Dashboard</a>
@@ -186,6 +202,30 @@ let allTrends = [];
 let activeFilter = 'ALL';
 let currentUser = null;
 
+function escapeHtml(value) {
+    return String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function showToast(message, type) {
+    if (window.NexusAuth && typeof window.NexusAuth.showToast === 'function') {
+        window.NexusAuth.showToast(message, type || 'info');
+    }
+}
+
+function sanitizeHttpUrl(value) {
+    if (!window.NexusAuth || typeof window.NexusAuth.sanitizeUrl !== 'function') {
+        return String(value || '').trim();
+    }
+    return window.NexusAuth.sanitizeUrl(value);
+}
+
+function sanitizeImageUrl(value) {
+    if (!window.NexusAuth || typeof window.NexusAuth.sanitizeUrl !== 'function') {
+        return String(value || '').trim();
+    }
+    return window.NexusAuth.sanitizeUrl(value, { allowDataImage: true });
+}
+
 function handleLogout() {
     if (window.NexusAuth && typeof window.NexusAuth.logout === 'function') {
         window.NexusAuth.logout();
@@ -198,11 +238,69 @@ function handleLogout() {
     }
 }
 
-function formatDate(value) {
+function formatRelativeTime(value) {
     if (!value) return '';
     const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return '';
-    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    const ts = date.getTime();
+    if (Number.isNaN(ts)) return '';
+
+    const diffMs = Date.now() - ts;
+    const sec = Math.floor(diffMs / 1000);
+    if (sec < 60) return 'just now';
+    const min = Math.floor(sec / 60);
+    if (min < 60) return min + 'm';
+    const hr = Math.floor(min / 60);
+    if (hr < 24) return hr + 'h';
+    const day = Math.floor(hr / 24);
+    if (day < 7) return day + 'd';
+    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+function initialsFromName(name) {
+    const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+    const first = parts[0] ? parts[0][0] : 'N';
+    const second = parts[1] ? parts[1][0] : (parts[0] ? parts[0][1] : 'N');
+    return (first + (second || 'N')).toUpperCase();
+}
+
+function handleFromName(name) {
+    const raw = String(name || 'nexusnotes').trim().toLowerCase();
+    return '@' + raw.replace(/[^a-z0-9]+/g, '').slice(0, 14);
+}
+
+function makeFallbackAvatarUrl(seed) {
+    const safe = encodeURIComponent(String(seed || 'nexus-user').trim() || 'nexus-user');
+    return 'https://api.dicebear.com/7.x/identicon/svg?seed=' + safe;
+}
+
+function pickTechImageUrl(trend) {
+    const title = String(trend && trend.title ? trend.title : '').toLowerCase();
+    const tags = Array.isArray(trend && trend.domainTags) ? trend.domainTags.map((t) => String(t || '').toLowerCase()) : [];
+    const has = (...needles) => needles.some((n) => title.includes(n) || tags.includes(n));
+
+    const imageByTopic = {
+        ai: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1400&q=80',
+        database: 'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?auto=format&fit=crop&w=1400&q=80',
+        web: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1400&q=80',
+        cloud: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1400&q=80',
+        backend: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1400&q=80',
+        security: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1400&q=80',
+        systems: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1400&q=80',
+        network: 'https://images.unsplash.com/photo-1520869562399-e772f042f422?auto=format&fit=crop&w=1400&q=80',
+        default: 'https://images.unsplash.com/photo-1518773553398-650c184e0bb3?auto=format&fit=crop&w=1400&q=80'
+    };
+
+    let topic = 'default';
+    if (has('ai', 'agent', 'llm', 'machine')) topic = 'ai';
+    else if (has('mongodb', 'db', 'database')) topic = 'database';
+    else if (has('react', 'web', 'frontend')) topic = 'web';
+    else if (has('cloud', 'kubernetes', 'devops')) topic = 'cloud';
+    else if (has('http', 'api', 'backend', 'server')) topic = 'backend';
+    else if (has('security', 'cyber')) topic = 'security';
+    else if (has('cache', 'caching', 'system design')) topic = 'systems';
+    else if (has('network', 'tcp', 'dns')) topic = 'network';
+
+    return imageByTopic[topic] || imageByTopic.default;
 }
 
 function setFilter(filter) {
@@ -268,20 +366,51 @@ function renderFeed(trends) {
     }
 
     container.innerHTML = trends.map((trend) => {
-        const title = trend.title || 'Untitled trend';
-        const summary = trend.summary || 'No summary available.';
+        const title = escapeHtml(trend.title || 'Untitled trend');
+        const summary = escapeHtml(trend.summary || 'No summary available.');
         const tags = Array.isArray(trend.domainTags) ? trend.domainTags : [];
-        const published = formatDate(trend.publishedAt || trend.createdAt);
+        const published = formatRelativeTime(trend.publishedAt || trend.createdAt);
         const source = trend.source || 'EXTERNAL';
-        const link = trend.url ? '<a class="link-btn" href="' + trend.url + '" target="_blank" rel="noopener noreferrer">Open source</a>' : '';
-        const image = trend.imageUrl ? '<img class="tweet-image" src="' + trend.imageUrl + '" alt="" loading="lazy" />' : '';
+        const safeLink = sanitizeHttpUrl(trend.url || '');
+        const link = safeLink ? '<a class="link-btn" href="' + safeLink + '" target="_blank" rel="noopener noreferrer">Open source</a>' : '';
+
+        const authorObj = trend.postedBy && typeof trend.postedBy === 'object' ? trend.postedBy : null;
+        const authorNameRaw = (authorObj && authorObj.fullName)
+            ? String(authorObj.fullName)
+            : (source === 'INTERNAL'
+                ? (currentUser && currentUser.fullName ? String(currentUser.fullName) : 'NexusNotes')
+                : 'NexusNotes');
+        const authorName = escapeHtml(authorNameRaw);
+        const authorHandle = escapeHtml(handleFromName(authorNameRaw));
+        const authorAvatarRaw = (authorObj && authorObj.avatarUrl)
+            ? String(authorObj.avatarUrl)
+            : (currentUser && currentUser.avatarUrl ? String(currentUser.avatarUrl) : makeFallbackAvatarUrl(authorNameRaw));
+        const authorAvatar = sanitizeImageUrl(authorAvatarRaw) || makeFallbackAvatarUrl(authorNameRaw);
+
+        const imageRaw = trend.imageUrl ? String(trend.imageUrl) : pickTechImageUrl(trend);
+        const imageUrl = sanitizeImageUrl(imageRaw) || pickTechImageUrl(trend);
+        const image = imageUrl ? '<img class="tweet-image" src="' + imageUrl + '" alt="' + title + '" loading="lazy" />' : '';
+
+        const authorRow = '<div class="tweet-author">'
+            + '<div class="author-left">'
+            + '<div class="avatar-wrap">'
+            + '<img class="avatar-img" src="' + authorAvatar + '" alt="" loading="lazy" onerror="this.remove(); this.parentNode.innerHTML=\'' + escapeHtml(initialsFromName(authorNameRaw)) + '\'; this.parentNode.classList.add(\'avatar-fallback\');" />'
+            + '</div>'
+            + '<div class="author-meta">'
+            + '<div class="author-name">' + authorName + '</div>'
+            + '<div class="author-handle">' + authorHandle + '</div>'
+            + '</div>'
+            + '</div>'
+            + '<div class="tweet-time">' + (published || 'Recently') + '</div>'
+            + '</div>';
 
         return '<article class="tweet">'
-            + '<div class="tweet-top"><div class="tweet-title">' + title + '</div><div class="tweet-time">' + (published || 'Recently') + '</div></div>'
+            + authorRow
+            + '<div class="tweet-title">' + title + '</div>'
             + image
             + '<div class="tweet-summary">' + summary + '</div>'
-            + '<div class="tag-row">' + tags.map((tag) => '<span class="tag">#' + tag + '</span>').join('') + '</div>'
-            + '<div class="tweet-actions"><span class="tag">' + source + '</span>' + link + '</div>'
+            + '<div class="tag-row">' + tags.map((tag) => '<span class="tag">#' + escapeHtml(tag) + '</span>').join('') + '</div>'
+            + '<div class="tweet-actions"><span class="tag">' + escapeHtml(source) + '</span>' + link + '</div>'
             + '</article>';
     }).join('');
 }
@@ -295,18 +424,26 @@ async function loadFeed() {
         document.getElementById('userName').textContent = currentUser.fullName;
     }
 
-    const response = await window.NexusAuth.apiFetch('/tech-trends?limit=50', {
-        headers: { 'Content-Type': 'application/json' }
-    });
+    try {
+        const response = await window.NexusAuth.apiFetch('/tech-trends?limit=50', {
+            headers: { 'Content-Type': 'application/json' }
+        });
 
-    if (response.status === 401) {
-        handleLogout();
-        return;
+        if (response.status === 401) {
+            handleLogout();
+            return;
+        }
+
+        const data = await window.NexusAuth.parseJsonSafe(response);
+        allTrends = Array.isArray(data && data.data) ? data.data : [];
+        if (!Array.isArray(data && data.data)) {
+            showToast('Unable to parse feed data.', 'warning');
+        }
+        applyFilters();
+    } catch (err) {
+        document.getElementById('feedList').innerHTML = '<div class="error">Failed to load tech feed.</div>';
+        showToast('Failed to load tech feed.', 'error');
     }
-
-    const data = await window.NexusAuth.parseJsonSafe(response);
-    allTrends = Array.isArray(data && data.data) ? data.data : [];
-    applyFilters();
 }
 
 async function refreshFeed() {

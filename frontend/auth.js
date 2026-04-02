@@ -105,7 +105,8 @@
       fullName: user.fullName,
       email: user.email,
       role: user.role,
-      assignedSubjectIds: user.assignedSubjectIds || []
+      assignedSubjectIds: user.assignedSubjectIds || [],
+      avatarUrl: user.avatarUrl || ''
     });
 
     return { ok: true, user: getUser() };
@@ -268,6 +269,109 @@
     modal.addEventListener('click', closeOnBackdrop);
   }
 
+  function sanitizeUrl(rawUrl, options) {
+    const opts = Object.assign({ allowDataImage: false }, options || {});
+    const value = String(rawUrl || '').trim();
+
+    if (!value) {
+      return '';
+    }
+
+    if (opts.allowDataImage && /^data:image\/[a-zA-Z0-9+.-]+;base64,/i.test(value)) {
+      return value;
+    }
+
+    try {
+      const parsed = new URL(value, window.location.origin);
+      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+        return parsed.href;
+      }
+      return '';
+    } catch (err) {
+      return '';
+    }
+  }
+
+  function ensureToastRoot() {
+    const styleId = 'nexus-toast-styles';
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.textContent = `
+.nexus-toast-root {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  display: grid;
+  gap: 8px;
+  z-index: 2000;
+  max-width: min(360px, calc(100vw - 24px));
+}
+
+.nexus-toast {
+  border-radius: 10px;
+  border: 1px solid #2f3a48;
+  background: #111820;
+  color: #e6edf3;
+  padding: 10px 12px;
+  font-size: 0.86rem;
+  line-height: 1.35;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.nexus-toast-info {
+  border-color: #2f3a48;
+}
+
+.nexus-toast-success {
+  border-color: #2f9e6f;
+  background: #112a22;
+  color: #dff9ee;
+}
+
+.nexus-toast-warning {
+  border-color: #8a6a2a;
+  background: #2d2514;
+  color: #f5ddb0;
+}
+
+.nexus-toast-error {
+  border-color: #84414b;
+  background: #2a1f23;
+  color: #ffccd1;
+}
+      `;
+      document.head.appendChild(style);
+    }
+
+    let root = document.getElementById('nexus-toast-root');
+    if (!root) {
+      root = document.createElement('div');
+      root.id = 'nexus-toast-root';
+      root.className = 'nexus-toast-root';
+      document.body.appendChild(root);
+    }
+
+    return root;
+  }
+
+  function showToast(message, type, durationMs) {
+    const root = ensureToastRoot();
+    const safeType = ['info', 'success', 'warning', 'error'].includes(type) ? type : 'info';
+    const lifetime = Number.isFinite(Number(durationMs)) ? Number(durationMs) : 3200;
+
+    const node = document.createElement('div');
+    node.className = 'nexus-toast nexus-toast-' + safeType;
+    node.textContent = String(message || 'Done');
+    root.appendChild(node);
+
+    setTimeout(() => {
+      if (node && node.parentNode) {
+        node.parentNode.removeChild(node);
+      }
+    }, Math.max(lifetime, 1200));
+  }
+
   global.NexusAuth = {
     getApiBase,
     getToken,
@@ -280,6 +384,8 @@
     validateSession,
     requireAuth,
     redirectIfAuthenticated,
+    sanitizeUrl,
+    showToast,
     logout,
     confirmLogout
   };

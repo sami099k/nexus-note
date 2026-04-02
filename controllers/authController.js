@@ -4,6 +4,11 @@ const asyncHandler = require('../util/asyncHandler')
 const User = require('../models/User')
 const { ROLES } = require('../util/constants')
 
+const makeAvatarUrl = (seed) => {
+  const safeSeed = encodeURIComponent(String(seed || 'nexus-user').trim() || 'nexus-user')
+  return `https://api.dicebear.com/7.x/identicon/svg?seed=${safeSeed}`
+}
+
 const createToken = (user) => {
   const secret = process.env.JWT_SECRET
   const expiresIn = process.env.JWT_EXPIRES_IN || '7d'
@@ -39,7 +44,8 @@ const register = asyncHandler(async (req, res) => {
     fullName,
     email,
     passwordHash,
-    role: ROLES.USER
+    role: ROLES.USER,
+    avatarUrl: makeAvatarUrl(email || fullName)
   })
 
   const token = createToken(user)
@@ -51,7 +57,8 @@ const register = asyncHandler(async (req, res) => {
       id: user._id,
       fullName: user.fullName,
       email: user.email,
-      role: user.role
+      role: user.role,
+      avatarUrl: user.avatarUrl || ''
     }
   })
 })
@@ -98,7 +105,8 @@ const login = asyncHandler(async (req, res) => {
       fullName: user.fullName,
       email: user.email,
       role: user.role,
-      assignedSubjectIds: user.assignedSubjectIds
+      assignedSubjectIds: user.assignedSubjectIds,
+      avatarUrl: user.avatarUrl || ''
     }
   })
 })
@@ -113,7 +121,7 @@ const me = asyncHandler(async (req, res) => {
 })
 
 const updateMe = asyncHandler(async (req, res) => {
-  const { fullName, email, currentPassword, newPassword } = req.body
+  const { fullName, email, currentPassword, newPassword, avatarUrl } = req.body
 
   const user = await User.findById(req.user.id)
   if (!user) {
@@ -137,6 +145,10 @@ const updateMe = asyncHandler(async (req, res) => {
 
   if (typeof fullName === 'string' && fullName.trim()) {
     user.fullName = fullName.trim()
+  }
+
+  if (typeof avatarUrl === 'string') {
+    user.avatarUrl = avatarUrl.trim()
   }
 
   if (newPassword) {
@@ -165,7 +177,8 @@ const updateMe = asyncHandler(async (req, res) => {
       fullName: user.fullName,
       email: user.email,
       role: user.role,
-      assignedSubjectIds: user.assignedSubjectIds
+      assignedSubjectIds: user.assignedSubjectIds,
+      avatarUrl: user.avatarUrl || ''
     }
   })
 })
@@ -207,7 +220,8 @@ const bootstrapOwner = asyncHandler(async (req, res) => {
     fullName,
     email,
     passwordHash,
-    role: ROLES.OWNER
+    role: ROLES.OWNER,
+    avatarUrl: makeAvatarUrl(email || fullName)
   })
 
   const token = createToken(owner)
@@ -219,7 +233,8 @@ const bootstrapOwner = asyncHandler(async (req, res) => {
       id: owner._id,
       fullName: owner.fullName,
       email: owner.email,
-      role: owner.role
+      role: owner.role,
+      avatarUrl: owner.avatarUrl || ''
     }
   })
 })
