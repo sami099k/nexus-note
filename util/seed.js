@@ -90,6 +90,27 @@ const ensureSubjects = async (createdBy) => {
 const seedTechTrends = async () => {
   const count = await TechTrend.countDocuments()
   if (count > 0) {
+    const missing = await TechTrend.find({ $or: [{ imageUrl: { $exists: false } }, { imageUrl: '' }] })
+      .sort({ publishedAt: -1 })
+      .limit(12)
+
+    if (missing.length === 0) {
+      return
+    }
+
+    const toSeedKey = (value) =>
+      String(value || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 40) || crypto.randomBytes(6).toString('hex')
+
+    for (const item of missing) {
+      const seedKey = toSeedKey(item.title)
+      item.imageUrl = `https://picsum.photos/seed/${seedKey}/900/420`
+      await item.save()
+    }
+
     return
   }
 
@@ -99,6 +120,7 @@ const seedTechTrends = async () => {
       title: 'AI agents: practical patterns for real apps',
       summary: 'Where agents help (workflow automation, search+tools) and where they don’t (deterministic business logic).',
       url: 'https://example.com/ai-agents-patterns',
+      imageUrl: 'https://picsum.photos/seed/nexus-agents/900/420',
       domainTags: ['AI', 'Productivity'],
       source: 'EXTERNAL',
       publishedAt: new Date(now - 1000 * 60 * 60 * 24 * 2)
@@ -107,6 +129,7 @@ const seedTechTrends = async () => {
       title: 'MongoDB indexing checklist for API performance',
       summary: 'Use compound indexes, validate query plans, and avoid unbounded regex queries.',
       url: 'https://example.com/mongodb-indexing',
+      imageUrl: 'https://picsum.photos/seed/nexus-mongo/900/420',
       domainTags: ['DB', 'MongoDB'],
       source: 'EXTERNAL',
       publishedAt: new Date(now - 1000 * 60 * 60 * 12)
@@ -115,6 +138,7 @@ const seedTechTrends = async () => {
       title: 'React UI: accessibility-first component habits',
       summary: 'Focus states, keyboard navigation, aria labels, and reducing motion for usability.',
       url: 'https://example.com/react-a11y',
+      imageUrl: 'https://picsum.photos/seed/nexus-react/900/420',
       domainTags: ['Web', 'React'],
       source: 'EXTERNAL',
       publishedAt: new Date(now - 1000 * 60 * 60 * 30)
@@ -123,6 +147,7 @@ const seedTechTrends = async () => {
       title: 'System design: caching strategies that actually ship',
       summary: 'Cache keys, invalidation, and when to use TTL vs event-driven expiry.',
       url: 'https://example.com/system-design-caching',
+      imageUrl: 'https://picsum.photos/seed/nexus-caching/900/420',
       domainTags: ['System Design', 'Cloud'],
       source: 'EXTERNAL',
       publishedAt: new Date(now - 1000 * 60 * 60 * 40)
@@ -131,6 +156,7 @@ const seedTechTrends = async () => {
       title: 'HTTP fundamentals: what every backend should know',
       summary: 'Retries, idempotency, status codes, and safe request/response logging.',
       url: 'https://example.com/http-fundamentals',
+      imageUrl: 'https://picsum.photos/seed/nexus-http/900/420',
       domainTags: ['Web', 'Backend'],
       source: 'EXTERNAL',
       publishedAt: new Date(now - 1000 * 60 * 60 * 60)
@@ -139,6 +165,7 @@ const seedTechTrends = async () => {
       title: 'Internal: weekly engineering learning digest',
       summary: 'Short notes on what the team learned building NexusNotes this week.',
       url: '',
+      imageUrl: 'https://picsum.photos/seed/nexus-internal/900/420',
       domainTags: ['INTERNAL', 'Learning'],
       source: 'INTERNAL',
       publishedAt: new Date(now - 1000 * 60 * 60 * 6)

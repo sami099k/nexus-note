@@ -37,7 +37,7 @@ const listTechTrends = asyncHandler(async (req, res) => {
 })
 
 const createTechTrend = asyncHandler(async (req, res) => {
-  const { title, summary = '', url = '', domainTags = [], source = 'INTERNAL', publishedAt } = req.body
+  const { title, summary = '', url = '', domainTags = [], source = 'INTERNAL', publishedAt, imageUrl = '' } = req.body
 
   if (!title) {
     return res.status(400).json({ message: 'title is required' })
@@ -49,7 +49,8 @@ const createTechTrend = asyncHandler(async (req, res) => {
     url,
     domainTags,
     source,
-    publishedAt: publishedAt || new Date()
+    publishedAt: publishedAt || new Date(),
+    imageUrl
   })
 
   return res.status(201).json(item)
@@ -78,6 +79,7 @@ const ingestTechTrends = asyncHandler(async (req, res) => {
       title: item.title,
       summary: item.summary || '',
       url: item.url || '',
+      imageUrl: item.imageUrl || '',
       domainTags: Array.isArray(item.domainTags) ? item.domainTags : [],
       source: 'EXTERNAL',
       publishedAt: item.publishedAt || new Date()

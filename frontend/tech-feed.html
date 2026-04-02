@@ -79,6 +79,7 @@ body {
 .card-body { padding: 12px 14px; }
 .feed-list { display: grid; gap: 10px; }
 .tweet { border: 1px solid var(--line-soft); border-radius: 12px; background: #111820; padding: 12px; display: grid; gap: 10px; }
+.tweet-image { width: 100%; border-radius: 10px; border: 1px solid var(--line-soft); background: #0d1117; aspect-ratio: 16 / 9; object-fit: cover; }
 .tweet-top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
 .tweet-title { font-weight: 700; line-height: 1.35; }
 .tweet-time { color: var(--muted); font-size: 0.82rem; white-space: nowrap; }
@@ -273,9 +274,11 @@ function renderFeed(trends) {
         const published = formatDate(trend.publishedAt || trend.createdAt);
         const source = trend.source || 'EXTERNAL';
         const link = trend.url ? '<a class="link-btn" href="' + trend.url + '" target="_blank" rel="noopener noreferrer">Open source</a>' : '';
+        const image = trend.imageUrl ? '<img class="tweet-image" src="' + trend.imageUrl + '" alt="" loading="lazy" />' : '';
 
         return '<article class="tweet">'
             + '<div class="tweet-top"><div class="tweet-title">' + title + '</div><div class="tweet-time">' + (published || 'Recently') + '</div></div>'
+            + image
             + '<div class="tweet-summary">' + summary + '</div>'
             + '<div class="tag-row">' + tags.map((tag) => '<span class="tag">#' + tag + '</span>').join('') + '</div>'
             + '<div class="tweet-actions"><span class="tag">' + source + '</span>' + link + '</div>'

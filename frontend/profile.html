@@ -184,7 +184,12 @@ body {
                 <div class="card-body">
                     <div class="stat-list">
                         <div class="stat-item"><strong>Role</strong><span class="muted" id="summaryRole">-</span></div>
-                        <div class="stat-item"><strong>Assigned Subjects</strong><span class="muted" id="summarySubjects">0</span></div>
+                        <div class="stat-item"><strong>My Subjects</strong><span class="muted" id="summarySubjects">0</span></div>
+                        <div class="stat-item">
+                            <strong>Joined Communities</strong>
+                            <div class="muted" id="mySubjectsHint">Loading...</div>
+                            <div id="mySubjectsList" style="margin-top:10px; display:flex; flex-wrap:wrap; gap:8px;"></div>
+                        </div>
                         <div class="stat-item"><strong>Status</strong><span class="muted" id="summaryStatus">Active</span></div>
                     </div>
                 </div>
@@ -249,9 +254,62 @@ function renderProfile(user) {
     document.getElementById('avatar').textContent = initialsFromName(name);
     document.getElementById('memberSince').textContent = 'Member since ' + formatDate(user.createdAt);
     document.getElementById('summaryRole').textContent = user.role || '-';
-    document.getElementById('summarySubjects').textContent = Array.isArray(user.assignedSubjectIds) ? user.assignedSubjectIds.length : 0;
+    document.getElementById('summarySubjects').textContent = '0';
     document.getElementById('summaryStatus').textContent = user.isActive === false ? 'Inactive' : 'Active';
     resetForm();
+}
+
+function escapeHtml(value) {
+    return String(value || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function renderMySubjects(subjects) {
+    const hint = document.getElementById('mySubjectsHint');
+    const list = document.getElementById('mySubjectsList');
+    if (!hint || !list) return;
+
+    if (!subjects.length) {
+        hint.textContent = 'You have not joined any subjects yet.';
+        list.innerHTML = '';
+        return;
+    }
+
+    hint.textContent = 'Click a subject to open its room.';
+    list.innerHTML = subjects
+        .map((s) => {
+            const id = String(s._id || '');
+            const code = s.code ? String(s.code) : '';
+            const label = [s.name, code ? '(' + code + ')' : ''].filter(Boolean).join(' ');
+            if (!id) {
+                return '<span class="pill">' + escapeHtml(label) + '</span>';
+            }
+            return '<a class="btn" style="padding:7px 10px; border-radius:999px;" href="subject.html?id=' + encodeURIComponent(id) + '">' + escapeHtml(label) + '</a>';
+        })
+        .join('');
+}
+
+async function loadMySubjects() {
+    const hint = document.getElementById('mySubjectsHint');
+    if (hint) hint.textContent = 'Loading...';
+
+    const [membershipRes, subjectsRes] = await Promise.all([
+        window.NexusAuth.apiFetch('/subjects/my-memberships', { headers: { 'Content-Type': 'application/json' } }),
+        window.NexusAuth.apiFetch('/subjects', { headers: { 'Content-Type': 'application/json' } })
+    ]);
+
+    if (membershipRes.status === 401 || subjectsRes.status === 401) {
+        handleLogout();
+        return;
+    }
+
+    const membershipData = await window.NexusAuth.parseJsonSafe(membershipRes);
+    const allSubjects = await window.NexusAuth.parseJsonSafe(subjectsRes);
+    const subjectIds = membershipData && Array.isArray(membershipData.subjectIds) ? membershipData.subjectIds.map(String) : [];
+    const all = Array.isArray(allSubjects) ? allSubjects : [];
+
+    const joined = all.filter((s) => subjectIds.includes(String(s._id)));
+    document.getElementById('summarySubjects').textContent = String(subjectIds.length);
+    renderMySubjects(joined);
 }
 
 async function loadProfile() {
@@ -271,6 +329,7 @@ async function loadProfile() {
     }
 
     renderProfile(user);
+    await loadMySubjects();
 }
 
 async function saveProfile() {

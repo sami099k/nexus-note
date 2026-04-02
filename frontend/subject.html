@@ -227,6 +227,23 @@ body {
     flex-wrap: wrap;
 }
 
+.subject-picker {
+    margin-top: 12px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.subject-picker label {
+    color: var(--muted);
+    font-size: 0.84rem;
+}
+
+.subject-picker select {
+    min-width: 240px;
+}
+
 .badge {
     border-radius: 999px;
     border: 1px solid var(--line);
@@ -432,6 +449,11 @@ body {
         <section class="hero">
             <h1 id="subjectName">Subject Workspace</h1>
             <p id="subjectSubtitle">Join this subject room to access discussions and notes.</p>
+            <div class="subject-picker" id="subjectPicker">
+                <label for="subjectSelect">Subject</label>
+                <select id="subjectSelect" class="input"></select>
+                <button class="btn" id="openSubjectBtn" type="button">Open</button>
+            </div>
             <div class="badges">
                 <span class="badge" id="memberCount">Members: -</span>
                 <span class="badge" id="threadCount">Threads: -</span>
@@ -516,8 +538,12 @@ body {
 <script src="auth.js"></script>
 <script>
 const params = new URLSearchParams(window.location.search);
-const subjectId = params.get('id');
+let subjectId = params.get('id') || params.get('subjectId');
+const subjectCode = params.get('code');
 const subjectName = params.get('name') || 'Subject Workspace';
+
+let cachedSubjects = [];
+let cachedMySubjectIds = new Set();
 
 let isMember = false;
 let hubMetrics = null;
@@ -527,6 +553,152 @@ function handleLogout() {
         window.NexusAuth.logout();
         return;
     }
+}
+
+function escapeHtml(value) {
+    return String(value || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function getLastSubjectId() {
+    try {
+        return window.localStorage.getItem('nexus.lastSubjectId');
+    } catch (err) {
+        return null;
+    }
+}
+
+function setLastSubjectId(value) {
+    try {
+        if (value) {
+            window.localStorage.setItem('nexus.lastSubjectId', String(value));
+        }
+    } catch (err) {
+        // ignore
+    }
+}
+
+async function fetchSubjects() {
+    const response = await window.NexusAuth.apiFetch('/subjects', {
+        headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (response.status === 401) {
+        window.location.href = 'login.html';
+        return [];
+    }
+
+    const data = await window.NexusAuth.parseJsonSafe(response);
+    return Array.isArray(data) ? data : [];
+}
+
+async function fetchMyMembershipSubjectIds() {
+    const response = await window.NexusAuth.apiFetch('/subjects/my-memberships', {
+        headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (response.status === 401) {
+        window.location.href = 'login.html';
+        return new Set();
+    }
+
+    const data = await window.NexusAuth.parseJsonSafe(response);
+    const ids = data && Array.isArray(data.subjectIds) ? data.subjectIds : [];
+    return new Set(ids.map((id) => String(id)));
+}
+
+function populateSubjectPicker(subjects, selectedId) {
+    const select = document.getElementById('subjectSelect');
+    if (!select) return;
+
+    select.innerHTML = '<option value="">Select a subject…</option>' + subjects
+        .map((subject) => {
+            const id = String(subject._id || '');
+            const code = subject.code ? String(subject.code) : '';
+            const label = [subject.name, code ? '(' + code + ')' : ''].filter(Boolean).join(' ');
+            return '<option value="' + escapeHtml(id) + '">' + escapeHtml(label) + '</option>';
+        })
+        .join('');
+
+    if (selectedId) {
+        select.value = String(selectedId);
+    }
+}
+
+function navigateToSubject(nextId) {
+    if (!nextId) return;
+    setLastSubjectId(nextId);
+    window.location.href = 'subject.html?id=' + encodeURIComponent(nextId);
+}
+
+function wirePickerActions() {
+    const openBtn = document.getElementById('openSubjectBtn');
+    const select = document.getElementById('subjectSelect');
+    if (!openBtn || !select) return;
+
+    openBtn.addEventListener('click', () => {
+        const nextId = select.value;
+        if (nextId) {
+            navigateToSubject(nextId);
+        }
+    });
+
+    select.addEventListener('change', () => {
+        // Enable quick navigation by pressing Open.
+    });
+}
+
+function renderSubjectsPickerView() {
+    document.getElementById('subjectName').textContent = 'Subjects';
+    document.getElementById('subjectSubtitle').textContent = 'Select a subject to view its hub, discussions, notes, interview questions, and roadmap.';
+    document.getElementById('membershipStatus').textContent = 'Select a subject';
+    document.getElementById('joinBtn').style.display = 'none';
+    document.getElementById('leaveBtn').style.display = 'none';
+    document.getElementById('newThreadWrap').style.display = 'none';
+    setMemberCount('-');
+    setCounts('-', '-');
+    setExtras('-', '-');
+
+    const container = document.getElementById('discussionsContainer');
+    if (!cachedSubjects.length) {
+        container.innerHTML = '<div class="placeholder">No subjects found.</div>';
+        return;
+    }
+
+    container.innerHTML = cachedSubjects
+        .map((subject) => {
+            const id = String(subject._id || '');
+            const isMine = cachedMySubjectIds.has(id);
+            const code = subject.code ? String(subject.code) : '';
+            const title = escapeHtml(subject.name || 'Subject');
+            const desc = escapeHtml(subject.description || '');
+            const badge = code ? '<span class="badge">' + escapeHtml(code) + '</span>' : '';
+            const mine = isMine ? '<span class="badge">Joined</span>' : '';
+            const action = id
+                ? '<button class="download-btn" data-open-subject-id="' + escapeHtml(id) + '">Open</button>'
+                : '';
+
+            return '<div class="resource">'
+                + '<div class="row"><span class="resource-title">' + title + '</span>'
+                + action
+                + '</div>'
+                + '<div class="resource-meta">' + [badge, mine].filter(Boolean).join(' ') + '</div>'
+                + (desc ? '<div class="resource-meta">' + desc + '</div>' : '')
+                + '</div>';
+        })
+        .join('');
+
+    container.querySelectorAll('[data-open-subject-id]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.openSubjectId;
+            if (id) {
+                navigateToSubject(id);
+            }
+        });
+    });
+
+    document.getElementById('notesContainer').innerHTML = '<div class="placeholder">Select a subject to view notes.</div>';
+    document.getElementById('questionsContainer').innerHTML = '<div class="placeholder">Select a subject to view interview questions.</div>';
+    document.getElementById('roadmapsContainer').innerHTML = '<div class="placeholder">Select a subject to view roadmaps.</div>';
 }
 
 function setCounts(threadsCount, notesCount) {
@@ -622,14 +794,7 @@ async function downloadResource(resourceId) {
 }
 
 function renderFallback() {
-    document.getElementById('subjectSubtitle').textContent = 'Open this page from the dashboard to load a selected subject.';
-    document.getElementById('discussionsContainer').innerHTML = '<div class="placeholder">No subject selected.</div>';
-    document.getElementById('notesContainer').innerHTML = '<div class="placeholder">No subject selected.</div>';
-    document.getElementById('questionsContainer').innerHTML = '<div class="placeholder">No subject selected.</div>';
-    document.getElementById('roadmapsContainer').innerHTML = '<div class="placeholder">No subject selected.</div>';
-    setMemberCount('-');
-    setCounts('-', '-');
-    setExtras('-', '-');
+    renderSubjectsPickerView();
 }
 
 async function loadHub() {
@@ -968,12 +1133,36 @@ async function initSubjectPage() {
         document.getElementById('userName').textContent = 'Signed in as ' + session.fullName;
     }
 
+    wirePickerActions();
+
+    const [subjects, myIds] = await Promise.all([fetchSubjects(), fetchMyMembershipSubjectIds()]);
+    cachedSubjects = subjects;
+    cachedMySubjectIds = myIds;
+
+    if (!subjectId && subjectCode) {
+        const match = cachedSubjects.find((s) => String(s.code || '').toUpperCase() === String(subjectCode).trim().toUpperCase());
+        if (match && match._id) {
+            subjectId = String(match._id);
+        }
+    }
+
+    if (!subjectId) {
+        const last = getLastSubjectId();
+        if (last) {
+            subjectId = last;
+        }
+    }
+
+    populateSubjectPicker(cachedSubjects, subjectId);
+
     document.getElementById('subjectName').textContent = subjectName;
 
     if (!subjectId) {
         renderFallback();
         return;
     }
+
+    setLastSubjectId(subjectId);
 
     const hub = await loadHub();
     if (hub && hub.subject) {
