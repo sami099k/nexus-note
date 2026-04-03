@@ -16,7 +16,7 @@ router.post('/', authorize(ROLES.USER, ROLES.SUBJECT_ADMIN, ROLES.OWNER), resour
 router.get('/', authorize(ROLES.USER, ROLES.SUBJECT_ADMIN, ROLES.OWNER), resourceController.getResources)
 router.get('/moderation/pending', authorize(ROLES.SUBJECT_ADMIN, ROLES.OWNER), resourceController.listPendingResources)
 router.get('/:id', authorize(ROLES.USER, ROLES.SUBJECT_ADMIN, ROLES.OWNER), resourceController.getResourceById)
-router.post('/:id/download', authorize(ROLES.USER, ROLES.SUBJECT_ADMIN, ROLES.OWNER), resourceController.downloadResource)
+router.get('/:id/download', authorize(ROLES.USER, ROLES.SUBJECT_ADMIN, ROLES.ADMIN, ROLES.OWNER), resourceController.downloadResource)
 
 router.patch('/:id/approve', authorize(ROLES.SUBJECT_ADMIN, ROLES.OWNER), resourceController.approveResource)
 router.patch('/:id/reject', authorize(ROLES.SUBJECT_ADMIN, ROLES.OWNER), resourceController.rejectResource)

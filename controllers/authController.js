@@ -24,7 +24,8 @@ const createToken = (user) => {
 }
 
 const register = asyncHandler(async (req, res) => {
-  const { fullName, email, password } = req.body
+  const { fullName, email, password, role } = req.body
+  console.log(`Registration attempt for ${email} with role ${role}`)
 
   if (!fullName || !email || !password) {
     return res.status(400).json({ message: 'fullName, email and password are required' })
@@ -36,18 +37,28 @@ const register = asyncHandler(async (req, res) => {
 
   const existingUser = await User.findOne({ email: String(email).toLowerCase() })
   if (existingUser) {
+    console.log(`Registration failed: email ${email} already in use`)
     return res.status(409).json({ message: 'Email already in use' })
   }
 
   const passwordHash = await bcrypt.hash(password, 10)
+  
+  // Validate role if provided, otherwise default to USER
+  let assignedRole = ROLES.USER
+  if (role && Object.values(ROLES).includes(role.toUpperCase())) {
+    assignedRole = role.toUpperCase()
+  }
+  console.log(`Assigning role: ${assignedRole}`)
+
   const user = await User.create({
     fullName,
     email,
     passwordHash,
-    role: ROLES.USER,
+    role: assignedRole,
     avatarUrl: makeAvatarUrl(email || fullName)
   })
 
+  console.log(`Registration successful for ${email}`)
   const token = createToken(user)
 
   return res.status(201).json({
@@ -65,6 +76,7 @@ const register = asyncHandler(async (req, res) => {
 
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body
+  console.log(`Login attempt for ${email}`)
 
   if (!email || !password) {
     return res.status(400).json({ message: 'email and password are required' })
@@ -73,10 +85,12 @@ const login = asyncHandler(async (req, res) => {
   const normalizedEmail = String(email).trim().toLowerCase()
   const user = await User.findOne({ email: normalizedEmail })
   if (!user) {
+    console.log(`User not found: ${normalizedEmail}`)
     return res.status(404).json({ message: 'Account does not exist' })
   }
 
   if (!user.isActive) {
+    console.log(`User inactive: ${normalizedEmail}`)
     return res.status(403).json({ message: 'Account is inactive' })
   }
 
@@ -88,13 +102,16 @@ const login = asyncHandler(async (req, res) => {
   try {
     isMatch = await bcrypt.compare(String(password), user.passwordHash)
   } catch (err) {
+    console.log(`Compare error: ${err.message}`)
     return res.status(401).json({ message: 'Invalid credentials' })
   }
 
   if (!isMatch) {
+    console.log(`Wrong password for: ${normalizedEmail}`)
     return res.status(401).json({ message: 'Wrong password' })
   }
 
+  console.log(`Login successful for: ${normalizedEmail}`)
   const token = createToken(user)
 
   return res.json({

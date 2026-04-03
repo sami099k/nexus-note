@@ -5,6 +5,7 @@ const asyncHandler = require('../util/asyncHandler')
 const Resource = require('../models/Resource')
 const Subject = require('../models/Subject')
 const Download = require('../models/Download')
+const Notification = require('../models/Notification')
 const { getGridFsBucket } = require('../util/gridfs')
 const { canModerateSubject } = require('../middleware/authorize')
 const { ROLES, RESOURCE_STATUS, RESOURCE_TYPES } = require('../util/constants')
@@ -103,7 +104,20 @@ const createResource = asyncHandler(async (req, res) => {
     status: RESOURCE_STATUS.PENDING
   })
 
-  return res.status(201).json(resource)
+  // Trigger Admin Notification
+  const subject = await Subject.findById(subjectId)
+  await Notification.create({
+    type: 'resource_upload',
+    message: `${req.user.fullName} uploaded ${title} in ${subject ? subject.name : 'Unknown Subject'}`,
+    subjectId,
+    triggeredBy: req.user.id,
+    resourceId: resource._id
+  })
+
+  return res.status(201).json({
+    message: 'Your submission has been sent for admin approval',
+    resource
+  })
 })
 
 const getResources = asyncHandler(async (req, res) => {
@@ -228,7 +242,8 @@ const downloadResource = asyncHandler(async (req, res) => {
   }
 
   const bucket = getGridFsBucket()
-  const downloadStream = bucket.openDownloadStream(resource.file.gridFsFileId)
+  const fileId = new mongoose.Types.ObjectId(String(resource.file.gridFsFileId))
+  const downloadStream = bucket.openDownloadStream(fileId)
 
   res.setHeader('Content-Type', resource.file.mimeType || 'application/octet-stream')
   res.setHeader('Content-Disposition', `attachment; filename="${resource.file.originalFileName}"`)

@@ -7,6 +7,7 @@ const DiscussionReply = require('../models/DiscussionReply')
 const FamousQuestion = require('../models/FamousQuestion')
 const Roadmap = require('../models/Roadmap')
 const Resource = require('../models/Resource')
+const Notification = require('../models/Notification')
 const { ROLES, RESOURCE_STATUS, RESOURCE_TYPES } = require('../util/constants')
 
 const parseTags = (tags) => {
@@ -228,6 +229,14 @@ const createDiscussionThread = asyncHandler(async (req, res) => {
     body,
     tags: parseTags(tags),
     isTrending: Boolean(isTrending) && isPrivilegedForSubject(req.user, subjectId)
+  })
+
+  // Trigger Admin Notification
+  await Notification.create({
+    type: 'thread_created',
+    message: `${req.user.fullName} created thread "${title}" in ${subject.name}`,
+    subjectId,
+    triggeredBy: req.user.id
   })
 
   return res.status(201).json(thread)

@@ -81,6 +81,10 @@ const resourceSchema = new mongoose.Schema(
       default: RESOURCE_STATUS.PENDING,
       index: true
     },
+    rejectionReason: {
+      type: String,
+      default: ''
+    },
     moderation: {
       moderatedBy: {
         type: mongoose.Schema.Types.ObjectId,
