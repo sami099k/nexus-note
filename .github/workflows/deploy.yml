@@ -1,0 +1,29 @@
+name: Deploy to Render
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Trigger Render Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Deploy to Render
+        run: |
+          curl -s "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" \
+            --request POST \
+            --write-out "\nHTTP Status: %{http_code}\n"
