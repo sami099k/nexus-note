@@ -422,6 +422,7 @@
         <div class="nav-group-title">Management</div>
         <div class="nav">
             <div class="nav-item active" data-tab="resources">Resources</div>
+            <div class="nav-item" data-tab="approvals">Approvals</div>
             <div class="nav-item" data-tab="threads">Threads</div>
             <div class="nav-item" data-tab="questions">Famous Questions</div>
             <div class="nav-item" data-tab="projects">Projects</div>
@@ -512,6 +513,49 @@
                             </tr>
                         </thead>
                         <tbody id="threadsList"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- APPROVALS TAB -->
+        <section id="tab-approvals" class="tab-content">
+            <div class="card" style="margin-bottom:20px;">
+                <div class="card-header">
+                    <h2 class="card-title">Pending Resources</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>User</th>
+                                <th>Subject</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pendingResourcesList"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Pending Projects</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>User</th>
+                                <th>Subject</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pendingProjectsList"></tbody>
                     </table>
                 </div>
             </div>
@@ -693,10 +737,48 @@
     </div>
 </div>
 
+<div id="previewModal" class="modal-backdrop">
+    <div class="modal-content" style="max-width:600px;">
+        <h2 class="modal-title">Submission Preview</h2>
+        <div id="previewContent" class="modal-body" style="text-align:left;"></div>
+        <div class="modal-actions">
+            <button class="btn" onclick="closePreviewModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<div id="rejectModal" class="modal-backdrop">
+    <div class="modal-content">
+        <h2 class="modal-title">Reject Submission</h2>
+        <div class="modal-body">
+            <div class="form-group" style="text-align:left;">
+                <label>Reason</label>
+                <select id="rejectReasonSelect" class="select">
+                    <option value="Low Quality">Low Quality</option>
+                    <option value="Duplicate">Duplicate</option>
+                    <option value="Irrelevant">Irrelevant</option>
+                    <option value="Incomplete">Incomplete</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="form-group" style="text-align:left; margin-top:10px;">
+                <label>Additional Notes (Optional)</label>
+                <textarea id="rejectReasonText" class="textarea" rows="3"></textarea>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn" onclick="closeRejectModal()">Cancel</button>
+            <button class="btn btn-danger" onclick="submitRejection()">Confirm Reject</button>
+        </div>
+    </div>
+</div>
+
 <script src="auth.js"></script>
 <script>
 // Dashboard State & Logic
 let subjects = [];
+let currentRejectId = null;
+let currentRejectType = null;
 
 function handleThemeToggle() {
     const newTheme = window.NexusAuth.toggleTheme();
@@ -734,6 +816,140 @@ async function initAdmin() {
     loadSubjectsTable();
     loadNotifications();
     loadSubjects();
+    loadPendingSubmissions();
+}
+
+async function loadPendingSubmissions() {
+    try {
+        const res = await window.NexusAuth.apiFetch('/admin/review/pending');
+        if (res.ok) {
+            const data = await res.json();
+            
+            const resList = document.getElementById('pendingResourcesList');
+            resList.innerHTML = data.resources.map(r => `
+                <tr>
+                    <td>${r.title}</td>
+                    <td>${r.uploadedBy?.fullName || 'N/A'}</td>
+                    <td>${r.subjectId?.name || 'N/A'}</td>
+                    <td>${new Date(r.createdAt).toLocaleDateString()}</td>
+                    <td>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn" onclick="openPreview('resource', '${r._id}')">Preview</button>
+                            <button class="btn btn-primary" onclick="approvePending('resource', '${r._id}')">Approve</button>
+                            <button class="btn btn-danger" onclick="openRejectModal('resource', '${r._id}')">Reject</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            const projList = document.getElementById('pendingProjectsList');
+            projList.innerHTML = data.projects.map(p => `
+                <tr>
+                    <td>${p.title}</td>
+                    <td>${p.createdBy?.fullName || 'N/A'}</td>
+                    <td>${p.subjectId?.name || 'N/A'}</td>
+                    <td>${new Date(p.createdAt).toLocaleDateString()}</td>
+                    <td>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn" onclick="openPreview('project', '${p._id}')">Preview</button>
+                            <button class="btn btn-primary" onclick="approvePending('project', '${p._id}')">Approve</button>
+                            <button class="btn btn-danger" onclick="openRejectModal('project', '${p._id}')">Reject</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+    } catch (err) {
+        console.error('Error loading submissions:', err);
+    }
+}
+
+async function approvePending(type, id) {
+    try {
+        const res = await window.NexusAuth.apiFetch(`/admin/review/approve/${type}/${id}`, { 
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        if (res.ok) {
+            window.NexusAuth.showToast('Submission approved', 'success');
+            loadPendingSubmissions();
+            loadStats();
+        } else {
+            const data = await res.json();
+            window.NexusAuth.showToast(data.message || 'Approval failed', 'error');
+        }
+    } catch (err) {
+        window.NexusAuth.showToast('Approval request failed', 'error');
+    }
+}
+
+function openRejectModal(type, id) {
+    currentRejectId = id;
+    currentRejectType = type;
+    document.getElementById('rejectModal').style.display = 'flex';
+}
+
+function closeRejectModal() {
+    document.getElementById('rejectModal').style.display = 'none';
+    currentRejectId = null;
+    currentRejectType = null;
+}
+
+async function submitRejection() {
+    if (!currentRejectId || !currentRejectType) return;
+    
+    const reason = document.getElementById('rejectReasonSelect').value;
+    const custom = document.getElementById('rejectReasonText').value.trim();
+    const finalReason = custom ? `${reason}: ${custom}` : reason;
+
+    try {
+        const res = await window.NexusAuth.apiFetch(`/admin/review/reject/${currentRejectType}/${currentRejectId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reason: finalReason })
+        });
+
+        if (res.ok) {
+            window.NexusAuth.showToast('Submission rejected', 'info');
+            closeRejectModal();
+            loadPendingSubmissions();
+            loadStats();
+        } else {
+            const data = await res.json();
+            window.NexusAuth.showToast(data.message || 'Rejection failed', 'error');
+        }
+    } catch (err) {
+        window.NexusAuth.showToast('Rejection request failed', 'error');
+    }
+}
+
+async function openPreview(type, id) {
+    if (type === 'resource') {
+        const token = window.NexusAuth.getToken();
+        // Fixed: ensured full API URL is constructed
+        const downloadUrl = `${window.NexusAuth.getApiBase()}/resources/${id}/download?token=${token}`;
+        window.open(downloadUrl, '_blank');
+        window.NexusAuth.showToast('Downloading file for review...', 'info');
+    } else {
+        try {
+            const res = await window.NexusAuth.apiFetch(`/admin/review/preview/${type}/${id}`);
+            if (res.ok) {
+                const item = await res.json();
+                if (item.projectLink) {
+                    window.open(item.projectLink, '_blank');
+                    window.NexusAuth.showToast('Opening project link...', 'info');
+                } else {
+                    window.NexusAuth.showToast('No project link found', 'error');
+                }
+            }
+        } catch (err) {
+            window.NexusAuth.showToast('Preview failed', 'error');
+        }
+    }
+}
+
+function closePreviewModal() {
+    document.getElementById('previewModal').style.display = 'none';
 }
 
 // Tab Switching
@@ -877,7 +1093,9 @@ async function loadSubjects() {
     if (res.ok) {
         subjects = await res.json();
         const select = document.getElementById('subjectSelect');
-        select.innerHTML = subjects.map(s => `<option value="${s._id}">${s.name}</option>`).join('');
+        if (select) {
+            select.innerHTML = subjects.map(s => `<option value="${s._id}">${s.name}</option>`).join('');
+        }
     }
 }
 
