@@ -1,7 +1,6 @@
 require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
-const path = require('path')
 const connectDb = require('./config/dbConnect')
 
 const app = express()
@@ -11,12 +10,9 @@ app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-// Serve frontend static files (HTML pages, auth.js, etc.)
-app.use(express.static(path.join(__dirname, 'frontend')))
-
-// Root → serve the landing page
+// Basic route
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend', 'index.html'))
+  res.json({ message: 'API server is running' })
 })
 
 // Routers
