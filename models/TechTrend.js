@@ -27,6 +27,15 @@ const techTrendSchema = new mongoose.Schema(
     publishedAt: {
       type: Date,
       default: Date.now
+    },
+    imageUrl: {
+      type: String,
+      default: ''
+    },
+    postedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null
     }
   },
   {

@@ -1,5 +1,6 @@
 const asyncHandler = require('../util/asyncHandler')
 const TechTrend = require('../models/TechTrend')
+const { ROLES } = require('../util/constants')
 
 const listTechTrends = asyncHandler(async (req, res) => {
   const { q, domainTag, source, page = 1, limit = 20 } = req.query
@@ -22,7 +23,11 @@ const listTechTrends = asyncHandler(async (req, res) => {
   const skip = (pageNum - 1) * limitNum
 
   const [items, total] = await Promise.all([
-    TechTrend.find(filters).sort({ publishedAt: -1 }).skip(skip).limit(limitNum),
+    TechTrend.find(filters)
+      .sort({ publishedAt: -1 })
+      .skip(skip)
+      .limit(limitNum)
+      .populate('postedBy', 'fullName avatarUrl'),
     TechTrend.countDocuments(filters)
   ])
 
@@ -37,19 +42,25 @@ const listTechTrends = asyncHandler(async (req, res) => {
 })
 
 const createTechTrend = asyncHandler(async (req, res) => {
-  const { title, summary = '', url = '', domainTags = [], source = 'INTERNAL', publishedAt } = req.body
+  const { title, summary = '', url = '', domainTags = [], source = 'INTERNAL', publishedAt, imageUrl = '' } = req.body
 
   if (!title) {
     return res.status(400).json({ message: 'title is required' })
   }
+
+  const requestedSource = String(source || 'INTERNAL').toUpperCase()
+  const isOwner = req.user && req.user.role === ROLES.OWNER
+  const normalizedSource = isOwner && requestedSource === 'EXTERNAL' ? 'EXTERNAL' : 'INTERNAL'
 
   const item = await TechTrend.create({
     title,
     summary,
     url,
     domainTags,
-    source,
-    publishedAt: publishedAt || new Date()
+    source: normalizedSource,
+    publishedAt: publishedAt || new Date(),
+    imageUrl,
+    postedBy: normalizedSource === 'INTERNAL' ? req.user.id : null
   })
 
   return res.status(201).json(item)
@@ -78,9 +89,11 @@ const ingestTechTrends = asyncHandler(async (req, res) => {
       title: item.title,
       summary: item.summary || '',
       url: item.url || '',
+      imageUrl: item.imageUrl || '',
       domainTags: Array.isArray(item.domainTags) ? item.domainTags : [],
       source: 'EXTERNAL',
-      publishedAt: item.publishedAt || new Date()
+      publishedAt: item.publishedAt || new Date(),
+      postedBy: null
     }))
 
   const created = await TechTrend.insertMany(normalizedItems)

@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create New | NexusNotes</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --bg: #0d1117;
+    --bg-soft: #161b22;
+    --panel: #1f2630;
+    --line: #30363d;
+    --line-soft: #262c36;
+    --text: #e6edf3;
+    --muted: #9198a1;
+    --accent: #2f81f7;
+    --accent-soft: #1b2f4a;
+    --danger: #f85149;
+    --success: #3fb950;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+.app-shell {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+}
+
+.sidebar {
+    background: var(--bg-soft);
+    border-right: 1px solid var(--line);
+    padding: 20px 14px;
+}
+
+.brand {
+    display: block;
+    padding: 0 8px 16px;
+    border-bottom: 1px solid var(--line-soft);
+    margin-bottom: 16px;
+}
+
+.brand-name {
+    font-family: 'Fraunces', serif;
+    font-size: 1.2rem;
+}
+
+.brand-sub {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 0.78rem;
+}
+
+.nav-group-title {
+    color: var(--muted);
+    font-size: 0.77rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 14px 8px 8px;
+}
+
+.nav {
+    list-style: none;
+    display: grid;
+    gap: 6px;
+}
+
+.nav a {
+    color: #c9d1d9;
+    text-decoration: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 10px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+}
+
+.nav-main {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-icon {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 15px 15px;
+    opacity: 0.9;
+}
+
+.icon-dashboard { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23c9d1d9' d='M1.75 2A1.75 1.75 0 0 0 0 3.75v8.5C0 13.216.784 14 1.75 14h12.5A1.75 1.75 0 0 0 16 12.25v-8.5A1.75 1.75 0 0 0 14.25 2H1.75Zm0 1.5h12.5c.138 0 .25.112.25.25v8.5a.25.25 0 0 1-.25.25H1.75a.25.25 0 0 1-.25-.25v-8.5c0-.138.112-.25.25-.25ZM3 5.25A.75.75 0 0 1 3.75 4.5h3a.75.75 0 0 1 0 1.5h-3A.75.75 0 0 1 3 5.25Zm0 3A.75.75 0 0 1 3.75 7.5h4.5a.75.75 0 0 1 0 1.5h-4.5A.75.75 0 0 1 3 8.25Zm0 3A.75.75 0 0 1 3.75 10.5h7a.75.75 0 0 1 0 1.5h-7A.75.75 0 0 1 3 11.25Z'/%3E%3C/svg%3E"); }
+.icon-subjects { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23c9d1d9' d='M2 2.75A1.75 1.75 0 0 1 3.75 1h8.5A1.75 1.75 0 0 1 14 2.75v10.5A1.75 1.75 0 0 1 12.25 15h-8.5A1.75 1.75 0 0 1 2 13.25V2.75Zm1.75-.25a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25V2.75a.25.25 0 0 0-.25-.25h-8.5ZM4.5 4.5h7a.75.75 0 0 1 0 1.5h-7a.75.75 0 0 1 0-1.5Zm0 3h7a.75.75 0 0 1 0 1.5h-7a.75.75 0 0 1 0-1.5Zm0 3h4a.75.75 0 0 1 0 1.5h-4a.75.75 0 0 1 0-1.5Z'/%3E%3C/svg%3E"); }
+.icon-feed { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23c9d1d9' d='M2.1 5.5A1.4 1.4 0 1 1 .7 4.1 1.4 1.4 0 0 1 2.1 5.5Zm0 4.7A1.4 1.4 0 1 1 .7 8.8a1.4 1.4 0 0 1 1.4 1.4Zm0 4.8A1.4 1.4 0 1 1 .7 13.6a1.4 1.4 0 0 1 1.4 1.4Zm2.6-9.8v1.6h10.5V5.2H4.7Zm0 4.7v1.6h10.5V9.9H4.7Zm0 4.8v1.6h7.5v-1.6H4.7Z'/%3E%3C/svg%3E"); }
+.icon-profile { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23c9d1d9' d='M8 8.25A3.25 3.25 0 1 0 8 1.75a3.25 3.25 0 0 0 0 6.5Zm0 1.5c-3.2 0-5.75 1.72-5.75 3.92V15h11.5v-.33c0-2.2-2.55-3.92-5.75-3.92Z'/%3E%3C/svg%3E"); }
+.icon-logout { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23ffb3ad' d='M6.75 1.5A1.75 1.75 0 0 0 5 3.25v1.5a.75.75 0 0 0 1.5 0v-1.5c0-.138.112-.25.25-.25h5.5c.138 0 .25.112.25.25v8.5a.25.25 0 0 1-.25.25h-5.5a.25.25 0 0 1-.25-.25v-1.5a.75.75 0 0 0-1.5 0v1.5A1.75 1.75 0 0 0 6.75 14h5.5A1.75 1.75 0 0 0 14 12.25v-8.5A1.75 1.75 0 0 0 12.25 2h-5.5ZM8.28 5.22a.75.75 0 0 0-1.06 1.06L8.19 7.25H1.75a.75.75 0 0 0 0 1.5h6.44L7.22 9.72a.75.75 0 1 0 1.06 1.06l2.25-2.25a.75.75 0 0 0 0-1.06L8.28 5.22Z'/%3E%3C/svg%3E"); }
+
+.nav a:hover { background: #222b36; border-color: #2b3542; }
+.nav a.active { background: #1a2f27; border-color: #2f9e6f; color: #ffffff; }
+.nav a.logout { color: #ffb3ad; background: #2a1f23; border-color: #5b2a2f; }
+.nav a.logout:hover { background: #3a242a; border-color: #84414b; }
+
+.main {
+    padding: 18px 22px 28px;
+}
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.top-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.user-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--line);
+    background: #121821;
+    border-radius: 999px;
+    padding: 6px 10px;
+    color: var(--muted);
+    font-size: 0.84rem;
+    max-width: 300px;
+    text-decoration: none;
+}
+
+.user-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--success);
+    flex-shrink: 0;
+}
+
+.user-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.btn {
+    border: 1px solid var(--line);
+    background: #212830;
+    color: var(--text);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.btn:hover { border-color: #3b4552; }
+
+.btn-primary {
+    background: var(--accent);
+    border-color: #2f81f7;
+    color: #ffffff;
+}
+
+.hero {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--bg-soft);
+    padding: 16px;
+    margin-bottom: 14px;
+}
+
+.hero h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.45rem;
+    margin-bottom: 6px;
+}
+
+.hero p {
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.card {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--bg-soft);
+}
+
+.card-header {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line-soft);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-title { font-weight: 700; }
+.card-subtitle { font-size: 0.82rem; color: var(--muted); }
+.card-body { padding: 12px 14px; }
+
+.field {
+    display: grid;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.field label {
+    color: var(--muted);
+    font-size: 0.82rem;
+}
+
+.input,
+.textarea {
+    width: 100%;
+    border: 1px solid var(--line-soft);
+    background: #0d1117;
+    color: var(--text);
+    border-radius: 8px;
+    padding: 10px 12px;
+    outline: none;
+}
+
+.textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.input:focus,
+.textarea:focus {
+    border-color: var(--accent);
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 140px;
+    gap: 10px;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+.status {
+    color: var(--muted);
+    font-size: 0.84rem;
+}
+
+.quick-links {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.helper {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 0.84rem;
+    line-height: 1.45;
+}
+
+@media (max-width: 1120px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 1020px) {
+    .app-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+    }
+}
+
+@media (max-width: 640px) {
+    .row {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-name">NexusNotes</div>
+            <div class="brand-sub">Learning Workspace</div>
+        </div>
+
+        <div class="nav-group-title">Workspace</div>
+        <ul class="nav">
+            <li><a href="home.html"><span class="nav-main"><span class="nav-icon icon-dashboard"></span><span>Dashboard</span></span></a></li>
+            <li><a href="subject.html"><span class="nav-main"><span class="nav-icon icon-subjects"></span><span>Subjects</span></span></a></li>
+            <li><a href="tech-feed.html"><span class="nav-main"><span class="nav-icon icon-feed"></span><span>Tech Feed</span></span></a></li>
+            <li><a href="profile.html"><span class="nav-main"><span class="nav-icon icon-profile"></span><span>My Profile</span></span></a></li>
+            <li><a class="logout" href="#" onclick="handleLogout(); return false;"><span class="nav-main"><span class="nav-icon icon-logout"></span><span>Logout</span></span></a></li>
+        </ul>
+
+        <div class="nav-group-title">Subject Bases</div>
+        <ul class="nav">
+            <li><a href="home.html#myBases"><span class="nav-main"><span>My Bases</span></span></a></li>
+            <li><a href="home.html#joinedBases"><span class="nav-main"><span>Joined Bases</span></span></a></li>
+            <li><a href="home.html#exploreBases"><span class="nav-main"><span>Explore Public</span></span></a></li>
+            <li><a href="create.html" class="active"><span class="nav-main"><span>Create New</span></span></a></li>
+        </ul>
+    </aside>
+
+    <main class="main">
+        <div class="topbar">
+            <div class="top-actions">
+                <a class="user-badge" href="profile.html"><span class="user-dot"></span><span class="user-label" id="userName">Signed in</span></a>
+                <a class="btn" href="home.html">Back to Dashboard</a>
+            </div>
+        </div>
+
+        <section class="hero">
+            <h1>Create New</h1>
+            <p>Create a new subject base or publish a new tech feed post from one place.</p>
+        </section>
+
+        <section class="grid">
+            <section class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Create Subject Base</h2>
+                    <span class="card-subtitle">Subject community setup</span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="field" style="margin-top:0;">
+                            <label for="createSubjectName">Subject name</label>
+                            <input id="createSubjectName" class="input" placeholder="e.g., System Design Fundamentals" />
+                        </div>
+                        <div class="field" style="margin-top:0;">
+                            <label for="createSubjectCode">Code</label>
+                            <input id="createSubjectCode" class="input" placeholder="e.g., SYS" />
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="createSubjectDesc">Description</label>
+                        <textarea id="createSubjectDesc" class="textarea" placeholder="What this subject base covers, outcomes, and audience."></textarea>
+                    </div>
+                    <div class="field">
+                        <label for="createSubjectVisibility">Visibility</label>
+                        <select id="createSubjectVisibility" class="input">
+                            <option value="PUBLIC">Public</option>
+                            <option value="PRIVATE">Private</option>
+                        </select>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-primary" id="createSubjectBtn" type="button">Create Subject Base</button>
+                        <span class="status" id="createSubjectStatus"></span>
+                    </div>
+                    <div class="quick-links" id="subjectQuickLinks" style="display:none;">
+                        <a class="btn" id="openSubjectLink" href="home.html">Open Subject</a>
+                        <a class="btn" href="home.html">Go to Dashboard</a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Create Tech Feed Post</h2>
+                    <span class="card-subtitle">Published as internal post</span>
+                </div>
+                <div class="card-body">
+                    <div class="field" style="margin-top:0;">
+                        <label for="createTrendTitle">Title</label>
+                        <input id="createTrendTitle" class="input" placeholder="e.g., Building resilient API retries" />
+                    </div>
+                    <div class="field">
+                        <label for="createTrendSummary">Summary</label>
+                        <textarea id="createTrendSummary" class="textarea" placeholder="Write a concise summary for the feed."></textarea>
+                    </div>
+                    <div class="field">
+                        <label for="createTrendUrl">Source URL (optional)</label>
+                        <input id="createTrendUrl" class="input" placeholder="https://example.com/article" />
+                    </div>
+                    <div class="row">
+                        <div class="field" style="margin-top:0;">
+                            <label for="createTrendTags">Tags (comma-separated)</label>
+                            <input id="createTrendTags" class="input" placeholder="AI, Backend, Cloud" />
+                        </div>
+                        <div class="field" style="margin-top:0;">
+                            <label for="createTrendImage">Image URL (optional)</label>
+                            <input id="createTrendImage" class="input" placeholder="https://..." />
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-primary" id="createTrendBtn" type="button">Publish Tech Post</button>
+                        <span class="status" id="createTrendStatus"></span>
+                    </div>
+                    <div class="quick-links" id="trendQuickLinks" style="display:none;">
+                        <a class="btn" href="tech-feed.html">Open Tech Feed</a>
+                        <a class="btn" href="home.html">Go to Dashboard</a>
+                    </div>
+                    <p class="helper">For normal users, posts are created as INTERNAL feed posts and shown in Tech Feed.</p>
+                </div>
+            </section>
+        </section>
+    </main>
+</div>
+
+<script src="auth.js"></script>
+<script>
+function handleLogout() {
+    if (window.NexusAuth && typeof window.NexusAuth.logout === 'function') {
+        window.NexusAuth.logout();
+        return;
+    }
+
+    if (window.confirm('Are you sure you want to log out?')) {
+        window.NexusAuth && window.NexusAuth.clearSession && window.NexusAuth.clearSession();
+        window.location.href = 'index.html';
+    }
+}
+
+function parseTags(value) {
+    return String(value || '')
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean);
+}
+
+function showToast(message, type) {
+    if (window.NexusAuth && typeof window.NexusAuth.showToast === 'function') {
+        window.NexusAuth.showToast(message, type || 'info');
+    }
+}
+
+function sanitizeHttpUrl(value) {
+    if (!window.NexusAuth || typeof window.NexusAuth.sanitizeUrl !== 'function') {
+        return String(value || '').trim();
+    }
+    return window.NexusAuth.sanitizeUrl(value);
+}
+
+async function createSubjectBase() {
+    const nameEl = document.getElementById('createSubjectName');
+    const codeEl = document.getElementById('createSubjectCode');
+    const descEl = document.getElementById('createSubjectDesc');
+    const visEl = document.getElementById('createSubjectVisibility');
+    const btn = document.getElementById('createSubjectBtn');
+    const statusEl = document.getElementById('createSubjectStatus');
+    const linksWrap = document.getElementById('subjectQuickLinks');
+    const openLink = document.getElementById('openSubjectLink');
+
+    const name = String(nameEl.value || '').trim();
+    const code = String(codeEl.value || '').trim();
+    const description = String(descEl.value || '').trim();
+    const visibility = String(visEl.value || 'PUBLIC').toUpperCase();
+
+    statusEl.textContent = '';
+    linksWrap.style.display = 'none';
+
+    if (!name || !code) {
+        statusEl.textContent = 'Name and code are required.';
+        showToast(statusEl.textContent, 'warning');
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Creating...';
+
+    try {
+        const response = await window.NexusAuth.apiFetch('/subjects', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, code, description, visibility })
+        });
+
+        if (response.status === 401) {
+            handleLogout();
+            return;
+        }
+
+        const data = await window.NexusAuth.parseJsonSafe(response);
+        if (!response.ok) {
+            statusEl.textContent = data && data.message ? data.message : 'Failed to create subject base.';
+            showToast(statusEl.textContent, 'error');
+            return;
+        }
+
+        statusEl.textContent = 'Subject base created.';
+        showToast(statusEl.textContent, 'success');
+        nameEl.value = '';
+        codeEl.value = '';
+        descEl.value = '';
+        visEl.value = 'PUBLIC';
+
+        if (data && data._id) {
+            openLink.href = 'subject.html?id=' + encodeURIComponent(data._id) + '&name=' + encodeURIComponent(data.name || 'Subject');
+            linksWrap.style.display = 'flex';
+        }
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Create Subject Base';
+    }
+}
+
+async function createTechPost() {
+    const titleEl = document.getElementById('createTrendTitle');
+    const summaryEl = document.getElementById('createTrendSummary');
+    const urlEl = document.getElementById('createTrendUrl');
+    const tagsEl = document.getElementById('createTrendTags');
+    const imageEl = document.getElementById('createTrendImage');
+    const btn = document.getElementById('createTrendBtn');
+    const statusEl = document.getElementById('createTrendStatus');
+    const linksWrap = document.getElementById('trendQuickLinks');
+
+    const title = String(titleEl.value || '').trim();
+    const summary = String(summaryEl.value || '').trim();
+    const urlRaw = String(urlEl.value || '').trim();
+    const imageRaw = String(imageEl.value || '').trim();
+    const domainTags = parseTags(tagsEl.value);
+    const url = urlRaw ? sanitizeHttpUrl(urlRaw) : '';
+    const imageUrl = imageRaw ? sanitizeHttpUrl(imageRaw) : '';
+
+    statusEl.textContent = '';
+    linksWrap.style.display = 'none';
+
+    if (!title) {
+        statusEl.textContent = 'Title is required.';
+        showToast(statusEl.textContent, 'warning');
+        return;
+    }
+
+    if (urlRaw && !url) {
+        statusEl.textContent = 'Source URL must be a valid http/https link.';
+        showToast(statusEl.textContent, 'warning');
+        return;
+    }
+
+    if (imageRaw && !imageUrl) {
+        statusEl.textContent = 'Image URL must be a valid http/https link.';
+        showToast(statusEl.textContent, 'warning');
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Publishing...';
+
+    try {
+        const response = await window.NexusAuth.apiFetch('/tech-trends', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                title,
+                summary,
+                url,
+                domainTags,
+                imageUrl,
+                source: 'INTERNAL'
+            })
+        });
+
+        if (response.status === 401) {
+            handleLogout();
+            return;
+        }
+
+        const data = await window.NexusAuth.parseJsonSafe(response);
+        if (!response.ok) {
+            statusEl.textContent = data && data.message ? data.message : 'Failed to publish tech post.';
+            showToast(statusEl.textContent, 'error');
+            return;
+        }
+
+        statusEl.textContent = 'Tech feed post published.';
+        showToast(statusEl.textContent, 'success');
+        titleEl.value = '';
+        summaryEl.value = '';
+        urlEl.value = '';
+        tagsEl.value = '';
+        imageEl.value = '';
+        linksWrap.style.display = 'flex';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Publish Tech Post';
+    }
+}
+
+async function initCreatePage() {
+    const user = await window.NexusAuth.requireAuth('login.html');
+    if (!user) return;
+
+    if (user.fullName) {
+        document.getElementById('userName').textContent = user.fullName;
+    }
+
+    document.getElementById('createSubjectBtn').addEventListener('click', createSubjectBase);
+    document.getElementById('createTrendBtn').addEventListener('click', createTechPost);
+}
+
+initCreatePage();
+</script>
+</body>
+</html>

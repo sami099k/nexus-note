@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tech Feed | NexusNotes</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --bg: #0d1117;
+    --bg-soft: #161b22;
+    --panel: #1f2630;
+    --line: #30363d;
+    --line-soft: #262c36;
+    --text: #e6edf3;
+    --muted: #9198a1;
+    --accent: #2f81f7;
+    --accent-soft: #1b2f4a;
+    --danger: #f85149;
+    --success: #3fb950;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+.app-shell { min-height: 100vh; display: grid; grid-template-columns: 280px 1fr 320px; }
+.sidebar, .right-rail { background: var(--bg-soft); border-right: 1px solid var(--line); padding: 20px 14px; }
+.right-rail { border-right: 0; border-left: 1px solid var(--line); }
+.brand { display: block; padding: 0 8px 16px; border-bottom: 1px solid var(--line-soft); margin-bottom: 16px; }
+.brand-name { font-family: 'Fraunces', serif; font-size: 1.2rem; }
+.brand-sub { margin-top: 4px; color: var(--muted); font-size: 0.78rem; }
+.nav-group-title { color: var(--muted); font-size: 0.77rem; text-transform: uppercase; letter-spacing: 0.08em; margin: 14px 8px 8px; }
+.nav { list-style: none; display: grid; gap: 6px; }
+.nav a { color: #c9d1d9; text-decoration: none; display: flex; justify-content: space-between; align-items: center; padding: 9px 10px; border-radius: 8px; border: 1px solid transparent; }
+.nav a.logout { color: #ffb3ad; background: #2a1f23; border-color: #5b2a2f; }
+.nav a.logout:hover { background: #3a242a; border-color: #84414b; }
+.nav-main { display: inline-flex; align-items: center; gap: 8px; }
+.nav-icon { width: 15px; height: 15px; flex-shrink: 0; background-position: center; background-repeat: no-repeat; background-size: 15px 15px; opacity: 0.9; }
+.icon-dashboard { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23c9d1d9' d='M1.75 2A1.75 1.75 0 0 0 0 3.75v8.5C0 13.216.784 14 1.75 14h12.5A1.75 1.75 0 0 0 16 12.25v-8.5A1.75 1.75 0 0 0 14.25 2H1.75Zm0 1.5h12.5c.138 0 .25.112.25.25v8.5a.25.25 0 0 1-.25.25H1.75a.25.25 0 0 1-.25-.25v-8.5c0-.138.112-.25.25-.25ZM3 5.25A.75.75 0 0 1 3.75 4.5h3a.75.75 0 0 1 0 1.5h-3A.75.75 0 0 1 3 5.25Zm0 3A.75.75 0 0 1 3.75 7.5h4.5a.75.75 0 0 1 0 1.5h-4.5A.75.75 0 0 1 3 8.25Zm0 3A.75.75 0 0 1 3.75 10.5h7a.75.75 0 0 1 0 1.5h-7A.75.75 0 0 1 3 11.25Z'/%3E%3C/svg%3E"); }
+.icon-subjects { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23c9d1d9' d='M2 2.75A1.75 1.75 0 0 1 3.75 1h8.5A1.75 1.75 0 0 1 14 2.75v10.5A1.75 1.75 0 0 1 12.25 15h-8.5A1.75 1.75 0 0 1 2 13.25V2.75Zm1.75-.25a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25V2.75a.25.25 0 0 0-.25-.25h-8.5ZM4.5 4.5h7a.75.75 0 0 1 0 1.5h-7a.75.75 0 0 1 0-1.5Zm0 3h7a.75.75 0 0 1 0 1.5h-7a.75.75 0 0 1 0-1.5Zm0 3h4a.75.75 0 0 1 0 1.5h-4a.75.75 0 0 1 0-1.5Z'/%3E%3C/svg%3E"); }
+.icon-feed { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23c9d1d9' d='M2.1 5.5A1.4 1.4 0 1 1 .7 4.1 1.4 1.4 0 0 1 2.1 5.5Zm0 4.7A1.4 1.4 0 1 1 .7 8.8a1.4 1.4 0 0 1 1.4 1.4Zm0 4.8A1.4 1.4 0 1 1 .7 13.6a1.4 1.4 0 0 1 1.4 1.4Zm2.6-9.8v1.6h10.5V5.2H4.7Zm0 4.7v1.6h10.5V9.9H4.7Zm0 4.8v1.6h7.5v-1.6H4.7Z'/%3E%3C/svg%3E"); }
+.icon-profile { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23c9d1d9' d='M8 8.25A3.25 3.25 0 1 0 8 1.75a3.25 3.25 0 0 0 0 6.5Zm0 1.5c-3.2 0-5.75 1.72-5.75 3.92V15h11.5v-.33c0-2.2-2.55-3.92-5.75-3.92Z'/%3E%3C/svg%3E"); }
+.icon-logout { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23ffb3ad' d='M6.75 1.5A1.75 1.75 0 0 0 5 3.25v1.5a.75.75 0 0 0 1.5 0v-1.5c0-.138.112-.25.25-.25h5.5c.138 0 .25.112.25.25v8.5a.25.25 0 0 1-.25.25h-5.5a.25.25 0 0 1-.25-.25v-1.5a.75.75 0 0 0-1.5 0v1.5A1.75 1.75 0 0 0 6.75 14h5.5A1.75 1.75 0 0 0 14 12.25v-8.5A1.75 1.75 0 0 0 12.25 2h-5.5ZM8.28 5.22a.75.75 0 0 0-1.06 1.06L8.19 7.25H1.75a.75.75 0 0 0 0 1.5h6.44L7.22 9.72a.75.75 0 1 0 1.06 1.06l2.25-2.25a.75.75 0 0 0 0-1.06L8.28 5.22Z'/%3E%3C/svg%3E"); }
+.nav a:hover { background: #222b36; border-color: #2b3542; }
+.nav a.active { background: #1a2f27; border-color: #2f9e6f; color: #ffffff; }
+.pill { min-width: 22px; height: 20px; border-radius: 999px; background: #222b36; border: 1px solid #2f3a48; color: var(--muted); font-size: 0.72rem; display: inline-flex; align-items: center; justify-content: center; padding: 0 7px; }
+.main { padding: 18px 18px 28px; }
+.topbar { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+.top-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.user-badge { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: #121821; border-radius: 999px; padding: 6px 10px; color: var(--muted); font-size: 0.84rem; max-width: 300px; text-decoration: none; }
+.user-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); flex-shrink: 0; }
+.user-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.btn { border: 1px solid var(--line); background: #212830; color: var(--text); border-radius: 8px; padding: 9px 12px; font-weight: 600; text-decoration: none; cursor: pointer; }
+.btn:hover { border-color: #3b4552; }
+.btn-danger { background: #2a1f23; border-color: #5b2a2f; color: #ffb3ad; }
+.btn-danger:hover { background: #3a242a; border-color: #84414b; }
+.hero { border: 1px solid var(--line); border-radius: 12px; background: var(--bg-soft); padding: 16px; margin-bottom: 14px; }
+.hero h1 { font-family: 'Fraunces', serif; font-size: 1.45rem; margin-bottom: 6px; }
+.hero p { color: var(--muted); line-height: 1.5; }
+.search-wrap { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-top: 12px; }
+.search { width: 100%; background: #0d1117; color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; outline: none; }
+.search:focus { border-color: var(--accent); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.chip { border: 1px solid var(--line); background: #111820; color: var(--muted); border-radius: 999px; padding: 6px 10px; cursor: pointer; }
+.chip.active { border-color: #2f9e6f; color: #c9f5e3; background: #112a22; }
+.feed-layout { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.feed-toolbar { display: flex; justify-content: space-between; gap: 10px; align-items: center; flex-wrap: wrap; }
+.section-card { border: 1px solid var(--line); border-radius: 10px; background: var(--bg-soft); }
+.card-header { padding: 12px 14px; border-bottom: 1px solid var(--line-soft); display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.card-title { font-weight: 700; }
+.card-body { padding: 12px 14px; }
+.feed-list { display: grid; gap: 10px; }
+.tweet { border: 1px solid var(--line-soft); border-radius: 12px; background: #111820; padding: 12px; display: grid; gap: 10px; }
+.tweet-author { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.author-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.avatar-wrap { width: 40px; height: 40px; border-radius: 999px; border: 1px solid var(--line-soft); background: #0d1117; display: grid; place-items: center; overflow: hidden; flex-shrink: 0; }
+.avatar-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.avatar-fallback { font-weight: 700; color: #c9d1d9; font-size: 0.9rem; }
+.author-meta { display: grid; gap: 2px; min-width: 0; }
+.author-name { font-weight: 700; font-size: 0.92rem; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.author-handle { color: var(--muted); font-size: 0.82rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tweet-time { color: var(--muted); font-size: 0.82rem; white-space: nowrap; }
+.tweet-image { width: 100%; border-radius: 10px; border: 1px solid var(--line-soft); background: #0d1117; aspect-ratio: 16 / 9; object-fit: cover; }
+.tweet-title { font-weight: 700; line-height: 1.35; }
+.tweet-summary { color: #c7d0da; line-height: 1.5; }
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { border: 1px solid #2a3340; color: #9db8d6; background: #101820; border-radius: 999px; padding: 4px 8px; font-size: 0.76rem; }
+.tweet-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.link-btn { border: 1px solid #2f9e6f; background: #112a22; color: #c9f5e3; border-radius: 8px; padding: 8px 10px; font-size: 0.84rem; text-decoration: none; }
+.link-btn:hover { border-color: #67c497; color: #e7fff5; }
+.helper-card { border: 1px solid var(--line); border-radius: 10px; background: #111820; padding: 14px; margin-bottom: 12px; }
+.helper-card h3 { font-size: 1rem; margin-bottom: 8px; }
+.helper-card p, .helper-card li { color: var(--muted); line-height: 1.5; }
+.helper-list { list-style: none; display: grid; gap: 8px; }
+.helper-list li { border: 1px solid var(--line-soft); border-radius: 8px; padding: 10px; background: #0f141b; }
+.placeholder, .error { border: 1px dashed var(--line); border-radius: 8px; padding: 12px; color: var(--muted); background: #10161d; }
+.error { color: #ffb4b9; border-color: #663338; background: #23181b; }
+.footer-note { margin-top: 14px; color: var(--muted); font-size: 0.88rem; }
+@media (max-width: 1200px) { .app-shell { grid-template-columns: 280px 1fr; } .right-rail { display: none; } }
+@media (max-width: 900px) { .app-shell { grid-template-columns: 1fr; } .sidebar { border-right: 0; border-bottom: 1px solid var(--line); } }
+</style>
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-name">NexusNotes</div>
+            <div class="brand-sub">Learning Workspace</div>
+        </div>
+
+        <div class="nav-group-title">Workspace</div>
+        <ul class="nav">
+            <li><a href="home.html"><span class="nav-main"><span class="nav-icon icon-dashboard"></span><span>Dashboard</span></span></a></li>
+            <li><a href="subject.html"><span class="nav-main"><span class="nav-icon icon-subjects"></span><span>Subjects</span></span></a></li>
+            <li><a href="tech-feed.html" class="active"><span class="nav-main"><span class="nav-icon icon-feed"></span><span>Tech Feed</span></span></a></li>
+            <li><a href="profile.html"><span class="nav-main"><span class="nav-icon icon-profile"></span><span>My Profile</span></span></a></li>
+            <li><a class="logout" href="#" onclick="handleLogout(); return false;"><span class="nav-main"><span class="nav-icon icon-logout"></span><span>Logout</span></span></a></li>
+        </ul>
+
+        <div class="nav-group-title">Subject Bases</div>
+        <ul class="nav">
+            <li><a href="home.html#myBases"><span class="nav-main"><span>My Bases</span></span></a></li>
+            <li><a href="home.html#joinedBases"><span class="nav-main"><span>Joined Bases</span></span></a></li>
+            <li><a href="home.html#exploreBases"><span class="nav-main"><span>Explore Public</span></span></a></li>
+            <li><a href="create.html"><span class="nav-main"><span>Create New</span></span></a></li>
+        </ul>
+    </aside>
+
+    <main class="main">
+        <div class="topbar">
+            <div class="top-actions">
+                <a class="user-badge" href="profile.html"><span class="user-dot"></span><span class="user-label" id="userName">Signed in</span></a>
+                <a class="btn" href="home.html">Back to Dashboard</a>
+            </div>
+        </div>
+
+        <section class="hero">
+            <h1>Tech Feed</h1>
+            <div class="search-wrap">
+                <input id="searchInput" class="search" placeholder="Search by title, tag, source, or summary" oninput="applyFilters()">
+                <button class="btn" onclick="refreshFeed()">Refresh</button>
+            </div>
+            <div class="chips">
+                <button class="chip active" data-filter="ALL" onclick="setFilter('ALL')">All</button>
+                <button class="chip" data-filter="INTERNAL" onclick="setFilter('INTERNAL')">Internal</button>
+                <button class="chip" data-filter="EXTERNAL" onclick="setFilter('EXTERNAL')">External</button>
+                <button class="chip" data-filter="AI" onclick="setFilter('AI')">AI</button>
+                <button class="chip" data-filter="Web" onclick="setFilter('Web')">Web</button>
+                <button class="chip" data-filter="Cloud" onclick="setFilter('Cloud')">Cloud</button>
+            </div>
+        </section>
+
+        <div class="feed-layout">
+            <section class="feed-toolbar">
+                <div class="muted" id="feedCount">Loading feed...</div>
+                <div class="muted" id="activeFilterLabel">Showing all trends</div>
+            </section>
+
+            <section class="section-card">
+                <div class="card-header">
+                    <h2 class="card-title">Feed</h2>
+                    <span class="muted">Curated by NexusNotes</span>
+                </div>
+                <div class="card-body">
+                    <div class="feed-list" id="feedList">
+                        <div class="placeholder">Loading tech feed...</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <p class="footer-note">NexusNotes Tech Feed</p>
+    </main>
+
+    <aside class="right-rail">
+        <div class="helper-card">
+            <h3>Trending Topics</h3>
+            <ul class="helper-list" id="topicList">
+                <li>Loading...</li>
+            </ul>
+        </div>
+
+        <div class="helper-card">
+            <h3>How to use</h3>
+            <p>Use filters to narrow the feed. Open any trend for source details.</p>
+        </div>
+    </aside>
+</div>
+
+<script src="auth.js"></script>
+<script>
+let allTrends = [];
+let activeFilter = 'ALL';
+let currentUser = null;
+
+function escapeHtml(value) {
+    return String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function showToast(message, type) {
+    if (window.NexusAuth && typeof window.NexusAuth.showToast === 'function') {
+        window.NexusAuth.showToast(message, type || 'info');
+    }
+}
+
+function sanitizeHttpUrl(value) {
+    if (!window.NexusAuth || typeof window.NexusAuth.sanitizeUrl !== 'function') {
+        return String(value || '').trim();
+    }
+    return window.NexusAuth.sanitizeUrl(value);
+}
+
+function sanitizeImageUrl(value) {
+    if (!window.NexusAuth || typeof window.NexusAuth.sanitizeUrl !== 'function') {
+        return String(value || '').trim();
+    }
+    return window.NexusAuth.sanitizeUrl(value, { allowDataImage: true });
+}
+
+function handleLogout() {
+    if (window.NexusAuth && typeof window.NexusAuth.logout === 'function') {
+        window.NexusAuth.logout();
+        return;
+    }
+
+    if (window.confirm('Are you sure you want to log out?')) {
+        window.NexusAuth && window.NexusAuth.clearSession && window.NexusAuth.clearSession();
+        window.location.href = 'index.html';
+    }
+}
+
+function formatRelativeTime(value) {
+    if (!value) return '';
+    const date = new Date(value);
+    const ts = date.getTime();
+    if (Number.isNaN(ts)) return '';
+
+    const diffMs = Date.now() - ts;
+    const sec = Math.floor(diffMs / 1000);
+    if (sec < 60) return 'just now';
+    const min = Math.floor(sec / 60);
+    if (min < 60) return min + 'm';
+    const hr = Math.floor(min / 60);
+    if (hr < 24) return hr + 'h';
+    const day = Math.floor(hr / 24);
+    if (day < 7) return day + 'd';
+    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+function initialsFromName(name) {
+    const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+    const first = parts[0] ? parts[0][0] : 'N';
+    const second = parts[1] ? parts[1][0] : (parts[0] ? parts[0][1] : 'N');
+    return (first + (second || 'N')).toUpperCase();
+}
+
+function handleFromName(name) {
+    const raw = String(name || 'nexusnotes').trim().toLowerCase();
+    return '@' + raw.replace(/[^a-z0-9]+/g, '').slice(0, 14);
+}
+
+function makeFallbackAvatarUrl(seed) {
+    const safe = encodeURIComponent(String(seed || 'nexus-user').trim() || 'nexus-user');
+    return 'https://api.dicebear.com/7.x/identicon/svg?seed=' + safe;
+}
+
+function pickTechImageUrl(trend) {
+    const title = String(trend && trend.title ? trend.title : '').toLowerCase();
+    const tags = Array.isArray(trend && trend.domainTags) ? trend.domainTags.map((t) => String(t || '').toLowerCase()) : [];
+    const has = (...needles) => needles.some((n) => title.includes(n) || tags.includes(n));
+
+    const imageByTopic = {
+        ai: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1400&q=80',
+        database: 'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?auto=format&fit=crop&w=1400&q=80',
+        web: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1400&q=80',
+        cloud: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1400&q=80',
+        backend: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1400&q=80',
+        security: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1400&q=80',
+        systems: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1400&q=80',
+        network: 'https://images.unsplash.com/photo-1520869562399-e772f042f422?auto=format&fit=crop&w=1400&q=80',
+        default: 'https://images.unsplash.com/photo-1518773553398-650c184e0bb3?auto=format&fit=crop&w=1400&q=80'
+    };
+
+    let topic = 'default';
+    if (has('ai', 'agent', 'llm', 'machine')) topic = 'ai';
+    else if (has('mongodb', 'db', 'database')) topic = 'database';
+    else if (has('react', 'web', 'frontend')) topic = 'web';
+    else if (has('cloud', 'kubernetes', 'devops')) topic = 'cloud';
+    else if (has('http', 'api', 'backend', 'server')) topic = 'backend';
+    else if (has('security', 'cyber')) topic = 'security';
+    else if (has('cache', 'caching', 'system design')) topic = 'systems';
+    else if (has('network', 'tcp', 'dns')) topic = 'network';
+
+    return imageByTopic[topic] || imageByTopic.default;
+}
+
+function setFilter(filter) {
+    activeFilter = filter;
+    document.querySelectorAll('.chip').forEach((chip) => {
+        chip.classList.toggle('active', chip.dataset.filter === filter);
+    });
+    document.getElementById('activeFilterLabel').textContent = filter === 'ALL' ? 'Showing all trends' : 'Filtered by ' + filter;
+    applyFilters();
+}
+
+function getSearchValue() {
+    return document.getElementById('searchInput').value.trim().toLowerCase();
+}
+
+function trendMatches(trend, query) {
+    if (!query) return true;
+    const haystack = [trend.title, trend.summary, trend.source, ...(trend.domainTags || [])].filter(Boolean).join(' ').toLowerCase();
+    return haystack.includes(query);
+}
+
+function filterByChip(trend) {
+    if (activeFilter === 'ALL') return true;
+    if (activeFilter === 'INTERNAL' || activeFilter === 'EXTERNAL') {
+        return String(trend.source || '').toUpperCase() === activeFilter;
+    }
+    return (trend.domainTags || []).some((tag) => String(tag).toLowerCase() === activeFilter.toLowerCase()) || String(trend.title || '').toLowerCase().includes(activeFilter.toLowerCase());
+}
+
+function applyFilters() {
+    const query = getSearchValue();
+    const filtered = allTrends.filter((trend) => trendMatches(trend, query) && filterByChip(trend));
+    renderFeed(filtered);
+    renderTopics(filtered);
+    document.getElementById('feedCount').textContent = filtered.length + ' posts in feed';
+}
+
+function renderTopics(trends) {
+    const tags = new Map();
+    trends.forEach((trend) => {
+        (trend.domainTags || []).forEach((tag) => {
+            const key = String(tag).trim();
+            if (!key) return;
+            tags.set(key, (tags.get(key) || 0) + 1);
+        });
+    });
+
+    const topTags = Array.from(tags.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    const node = document.getElementById('topicList');
+    if (!topTags.length) {
+        node.innerHTML = '<li>No tags found.</li>';
+        return;
+    }
+
+    node.innerHTML = topTags.map(([tag, count]) => '<li><strong>' + tag + '</strong><div class="muted">' + count + ' posts</div></li>').join('');
+}
+
+function renderFeed(trends) {
+    const container = document.getElementById('feedList');
+    if (!trends.length) {
+        container.innerHTML = '<div class="placeholder">No matching trends found.</div>';
+        return;
+    }
+
+    container.innerHTML = trends.map((trend) => {
+        const title = escapeHtml(trend.title || 'Untitled trend');
+        const summary = escapeHtml(trend.summary || 'No summary available.');
+        const tags = Array.isArray(trend.domainTags) ? trend.domainTags : [];
+        const published = formatRelativeTime(trend.publishedAt || trend.createdAt);
+        const source = trend.source || 'EXTERNAL';
+        const safeLink = sanitizeHttpUrl(trend.url || '');
+        const link = safeLink ? '<a class="link-btn" href="' + safeLink + '" target="_blank" rel="noopener noreferrer">Open source</a>' : '';
+
+        const authorObj = trend.postedBy && typeof trend.postedBy === 'object' ? trend.postedBy : null;
+        const authorNameRaw = (authorObj && authorObj.fullName)
+            ? String(authorObj.fullName)
+            : (source === 'INTERNAL'
+                ? (currentUser && currentUser.fullName ? String(currentUser.fullName) : 'NexusNotes')
+                : 'NexusNotes');
+        const authorName = escapeHtml(authorNameRaw);
+        const authorHandle = escapeHtml(handleFromName(authorNameRaw));
+        const authorAvatarRaw = (authorObj && authorObj.avatarUrl)
+            ? String(authorObj.avatarUrl)
+            : (currentUser && currentUser.avatarUrl ? String(currentUser.avatarUrl) : makeFallbackAvatarUrl(authorNameRaw));
+        const authorAvatar = sanitizeImageUrl(authorAvatarRaw) || makeFallbackAvatarUrl(authorNameRaw);
+
+        const imageRaw = trend.imageUrl ? String(trend.imageUrl) : pickTechImageUrl(trend);
+        const imageUrl = sanitizeImageUrl(imageRaw) || pickTechImageUrl(trend);
+        const image = imageUrl ? '<img class="tweet-image" src="' + imageUrl + '" alt="' + title + '" loading="lazy" />' : '';
+
+        const authorRow = '<div class="tweet-author">'
+            + '<div class="author-left">'
+            + '<div class="avatar-wrap">'
+            + '<img class="avatar-img" src="' + authorAvatar + '" alt="" loading="lazy" onerror="this.remove(); this.parentNode.innerHTML=\'' + escapeHtml(initialsFromName(authorNameRaw)) + '\'; this.parentNode.classList.add(\'avatar-fallback\');" />'
+            + '</div>'
+            + '<div class="author-meta">'
+            + '<div class="author-name">' + authorName + '</div>'
+            + '<div class="author-handle">' + authorHandle + '</div>'
+            + '</div>'
+            + '</div>'
+            + '<div class="tweet-time">' + (published || 'Recently') + '</div>'
+            + '</div>';
+
+        return '<article class="tweet">'
+            + authorRow
+            + '<div class="tweet-title">' + title + '</div>'
+            + image
+            + '<div class="tweet-summary">' + summary + '</div>'
+            + '<div class="tag-row">' + tags.map((tag) => '<span class="tag">#' + escapeHtml(tag) + '</span>').join('') + '</div>'
+            + '<div class="tweet-actions"><span class="tag">' + escapeHtml(source) + '</span>' + link + '</div>'
+            + '</article>';
+    }).join('');
+}
+
+async function loadFeed() {
+    const session = await window.NexusAuth.requireAuth('login.html');
+    if (!session) return;
+    currentUser = session;
+
+    if (currentUser.fullName) {
+        document.getElementById('userName').textContent = currentUser.fullName;
+    }
+
+    try {
+        const response = await window.NexusAuth.apiFetch('/tech-trends?limit=50', {
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (response.status === 401) {
+            handleLogout();
+            return;
+        }
+
+        const data = await window.NexusAuth.parseJsonSafe(response);
+        allTrends = Array.isArray(data && data.data) ? data.data : [];
+        if (!Array.isArray(data && data.data)) {
+            showToast('Unable to parse feed data.', 'warning');
+        }
+        applyFilters();
+    } catch (err) {
+        document.getElementById('feedList').innerHTML = '<div class="error">Failed to load tech feed.</div>';
+        showToast('Failed to load tech feed.', 'error');
+    }
+}
+
+async function refreshFeed() {
+    document.getElementById('feedCount').textContent = 'Refreshing...';
+    await loadFeed();
+}
+
+loadFeed();
+</script>
+</body>
+</html>

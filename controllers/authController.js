@@ -4,6 +4,11 @@ const asyncHandler = require('../util/asyncHandler')
 const User = require('../models/User')
 const { ROLES } = require('../util/constants')
 
+const makeAvatarUrl = (seed) => {
+  const safeSeed = encodeURIComponent(String(seed || 'nexus-user').trim() || 'nexus-user')
+  return `https://api.dicebear.com/7.x/identicon/svg?seed=${safeSeed}`
+}
+
 const createToken = (user) => {
   const secret = process.env.JWT_SECRET
   const expiresIn = process.env.JWT_EXPIRES_IN || '7d'
@@ -39,7 +44,8 @@ const register = asyncHandler(async (req, res) => {
     fullName,
     email,
     passwordHash,
-    role: ROLES.USER
+    role: ROLES.USER,
+    avatarUrl: makeAvatarUrl(email || fullName)
   })
 
   const token = createToken(user)
@@ -51,7 +57,8 @@ const register = asyncHandler(async (req, res) => {
       id: user._id,
       fullName: user.fullName,
       email: user.email,
-      role: user.role
+      role: user.role,
+      avatarUrl: user.avatarUrl || ''
     }
   })
 })
@@ -63,14 +70,29 @@ const login = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: 'email and password are required' })
   }
 
-  const user = await User.findOne({ email: String(email).toLowerCase() })
-  if (!user || !user.isActive) {
+  const normalizedEmail = String(email).trim().toLowerCase()
+  const user = await User.findOne({ email: normalizedEmail })
+  if (!user) {
+    return res.status(404).json({ message: 'Account does not exist' })
+  }
+
+  if (!user.isActive) {
+    return res.status(403).json({ message: 'Account is inactive' })
+  }
+
+  if (typeof user.passwordHash !== 'string' || !user.passwordHash) {
     return res.status(401).json({ message: 'Invalid credentials' })
   }
 
-  const isMatch = await bcrypt.compare(password, user.passwordHash)
-  if (!isMatch) {
+  let isMatch = false
+  try {
+    isMatch = await bcrypt.compare(String(password), user.passwordHash)
+  } catch (err) {
     return res.status(401).json({ message: 'Invalid credentials' })
+  }
+
+  if (!isMatch) {
+    return res.status(401).json({ message: 'Wrong password' })
   }
 
   const token = createToken(user)
@@ -83,7 +105,8 @@ const login = asyncHandler(async (req, res) => {
       fullName: user.fullName,
       email: user.email,
       role: user.role,
-      assignedSubjectIds: user.assignedSubjectIds
+      assignedSubjectIds: user.assignedSubjectIds,
+      avatarUrl: user.avatarUrl || ''
     }
   })
 })
@@ -95,6 +118,69 @@ const me = asyncHandler(async (req, res) => {
   }
 
   return res.json(user)
+})
+
+const updateMe = asyncHandler(async (req, res) => {
+  const { fullName, email, currentPassword, newPassword, avatarUrl } = req.body
+
+  const user = await User.findById(req.user.id)
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' })
+  }
+
+  const normalizedEmail = email ? String(email).trim().toLowerCase() : ''
+
+  if (normalizedEmail && normalizedEmail !== user.email) {
+    const emailTaken = await User.findOne({
+      email: normalizedEmail,
+      _id: { $ne: user._id }
+    })
+
+    if (emailTaken) {
+      return res.status(409).json({ message: 'Email already in use' })
+    }
+
+    user.email = normalizedEmail
+  }
+
+  if (typeof fullName === 'string' && fullName.trim()) {
+    user.fullName = fullName.trim()
+  }
+
+  if (typeof avatarUrl === 'string') {
+    user.avatarUrl = avatarUrl.trim()
+  }
+
+  if (newPassword) {
+    if (!currentPassword) {
+      return res.status(400).json({ message: 'currentPassword is required to change password' })
+    }
+
+    const isMatch = await bcrypt.compare(String(currentPassword), user.passwordHash)
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Current password is incorrect' })
+    }
+
+    if (String(newPassword).length < 6) {
+      return res.status(400).json({ message: 'New password must be at least 6 characters' })
+    }
+
+    user.passwordHash = await bcrypt.hash(String(newPassword), 10)
+  }
+
+  await user.save()
+
+  return res.json({
+    message: 'Profile updated',
+    user: {
+      id: user._id,
+      fullName: user.fullName,
+      email: user.email,
+      role: user.role,
+      assignedSubjectIds: user.assignedSubjectIds,
+      avatarUrl: user.avatarUrl || ''
+    }
+  })
 })
 
 const refresh = asyncHandler(async (req, res) => {
@@ -134,7 +220,8 @@ const bootstrapOwner = asyncHandler(async (req, res) => {
     fullName,
     email,
     passwordHash,
-    role: ROLES.OWNER
+    role: ROLES.OWNER,
+    avatarUrl: makeAvatarUrl(email || fullName)
   })
 
   const token = createToken(owner)
@@ -146,7 +233,8 @@ const bootstrapOwner = asyncHandler(async (req, res) => {
       id: owner._id,
       fullName: owner.fullName,
       email: owner.email,
-      role: owner.role
+      role: owner.role,
+      avatarUrl: owner.avatarUrl || ''
     }
   })
 })
@@ -155,6 +243,7 @@ module.exports = {
   register,
   login,
   me,
+  updateMe,
   refresh,
   bootstrapOwner
 }

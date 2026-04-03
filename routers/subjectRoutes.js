@@ -11,6 +11,8 @@ router.use(authMiddleware)
 
 router.get('/', subjectController.listSubjects)
 
+router.get('/my-memberships', subjectCommunityController.listMyMemberships)
+
 router.get('/:id/hub', subjectCommunityController.getSubjectHub)
 router.post('/:id/join', subjectCommunityController.joinSubject)
 router.delete('/:id/join', subjectCommunityController.leaveSubject)
@@ -33,8 +35,8 @@ router.post('/:id/roadmaps', subjectCommunityController.createRoadmap)
 
 router.get('/:id', subjectController.getSubjectById)
 
-router.post('/', authorize(ROLES.OWNER), subjectController.createSubject)
-router.patch('/:id', authorize(ROLES.OWNER), subjectController.updateSubject)
-router.delete('/:id', authorize(ROLES.OWNER), subjectController.deleteSubject)
+router.post('/', authorize(ROLES.USER, ROLES.SUBJECT_ADMIN, ROLES.OWNER), subjectController.createSubject)
+router.patch('/:id', authorize(ROLES.USER, ROLES.SUBJECT_ADMIN, ROLES.OWNER), subjectController.updateSubject)
+router.delete('/:id', authorize(ROLES.USER, ROLES.SUBJECT_ADMIN, ROLES.OWNER), subjectController.deleteSubject)
 
 module.exports = router

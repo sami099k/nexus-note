@@ -66,6 +66,26 @@ const canAccessSubjectRoom = async (user, subjectId) => {
   return isMemberOfSubject(user.id, subjectId)
 }
 
+const canAccessSubjectHub = async (user, subject) => {
+  if (!subject) {
+    return false
+  }
+
+  if (subject.visibility !== 'PRIVATE') {
+    return true
+  }
+
+  if (isPrivilegedForSubject(user, subject._id)) {
+    return true
+  }
+
+  if (String(subject.createdBy) === String(user.id)) {
+    return true
+  }
+
+  return isMemberOfSubject(user.id, subject._id)
+}
+
 const ensureRoomAccess = async (req, res, subjectId) => {
   const allowed = await canAccessSubjectRoom(req.user, subjectId)
   if (!allowed) {
@@ -84,6 +104,15 @@ const joinSubject = asyncHandler(async (req, res) => {
 
   if (!subject) {
     return res.status(404).json({ message: 'Subject not found' })
+  }
+
+  if (subject.visibility === 'PRIVATE') {
+    const allowed =
+      isPrivilegedForSubject(req.user, subjectId) || String(subject.createdBy) === String(req.user.id)
+
+    if (!allowed) {
+      return res.status(403).json({ message: 'This subject is private. You cannot join it.' })
+    }
   }
 
   const membership = await SubjectMembership.findOneAndUpdate(
@@ -125,6 +154,17 @@ const leaveSubject = asyncHandler(async (req, res) => {
   }
 
   return res.json({ message: 'Left subject room' })
+})
+
+const listMyMemberships = asyncHandler(async (req, res) => {
+  const memberships = await SubjectMembership.find({
+    userId: req.user.id,
+    status: 'ACTIVE'
+  }).select('subjectId')
+
+  return res.json({
+    subjectIds: memberships.map((membership) => String(membership.subjectId))
+  })
 })
 
 const getMyMembership = asyncHandler(async (req, res) => {
@@ -290,6 +330,10 @@ const addDiscussionReply = asyncHandler(async (req, res) => {
 const listSubjectNotes = asyncHandler(async (req, res) => {
   const { id: subjectId } = req.params
 
+  if (!(await ensureRoomAccess(req, res, subjectId))) {
+    return undefined
+  }
+
   const notes = await Resource.find({
     subjectId,
     status: RESOURCE_STATUS.APPROVED,
@@ -422,6 +466,10 @@ const getSubjectHub = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: 'Subject not found' })
   }
 
+  if (!(await canAccessSubjectHub(req.user, subject))) {
+    return res.status(403).json({ message: 'You do not have access to this subject' })
+  }
+
   const [
     activeMembers,
     notesCount,
@@ -465,6 +513,7 @@ const getSubjectHub = asyncHandler(async (req, res) => {
 module.exports = {
   joinSubject,
   leaveSubject,
+  listMyMemberships,
   getMyMembership,
   listSubjectMembers,
   createDiscussionThread,

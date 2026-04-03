@@ -528,8 +528,9 @@ footer {
   </footer>
 </div>
 
+<script src="auth.js"></script>
 <script>
-const hasToken = Boolean(localStorage.getItem('token'));
+const hasToken = Boolean(window.NexusAuth.getToken());
 if (hasToken) {
   document.getElementById('footerHint').textContent = 'Welcome back. Your dashboard is ready.';
 }

@@ -146,10 +146,16 @@ button {
     padding: 10px 14px;
     border: none;
     border-radius: 10px;
-    background: linear-gradient(120deg, var(--accent), #b6ff90);
-    color: #112100;
+    background: linear-gradient(120deg, #2f81f7, #79c0ff);
+    color: #f4f7fb;
     font-weight: 700;
     cursor: pointer;
+    box-shadow: 0 8px 18px rgba(47, 129, 247, 0.18);
+}
+
+button:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
 }
 
 .link {
@@ -237,7 +243,12 @@ button {
 </div>
 </div>
 
+<script src="auth.js"></script>
 <script>
+(async () => {
+    await window.NexusAuth.redirectIfAuthenticated('home.html');
+})();
+
 async function handleRegister() {
     const fullName = document.getElementById('fullName').value.trim();
     const email = document.getElementById('email').value.trim();
@@ -270,20 +281,19 @@ async function handleRegister() {
     btn.disabled = true;
 
     try {
-        const res = await fetch('http://localhost:5000/api/auth/register', {
+        const res = await fetch(window.NexusAuth.getApiBase() + '/auth/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ fullName, email, password })
         });
 
-        const data = await res.json();
+        const data = await window.NexusAuth.parseJsonSafe(res);
 
         if (!res.ok) {
-            throw new Error(data.message || 'Registration failed');
+            throw new Error((data && data.message) || 'Registration failed');
         }
 
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+        window.NexusAuth.saveSession(data.token, data.user);
         window.location.href = 'home.html';
     } catch (err) {
         errorMsg.textContent = err.message;
