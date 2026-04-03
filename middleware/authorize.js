@@ -28,7 +28,20 @@ const canModerateSubject = (user, subjectId) => {
   return user.assignedSubjectIds.includes(String(subjectId))
 }
 
+const requireAdmin = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ message: 'Unauthorized' })
+  }
+
+  if (req.user.role !== ROLES.ADMIN && req.user.role !== ROLES.OWNER) {
+    return res.status(403).json({ message: 'Forbidden: admin access required' })
+  }
+
+  return next()
+}
+
 module.exports = {
   authorize,
+  requireAdmin,
   canModerateSubject
 }

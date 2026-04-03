@@ -20,6 +20,7 @@ try {
   const apiRouter = require('./routers')
   app.use('/api', apiRouter)
 } catch (err) {
+  console.error('API Router Error:', err)
   // If routers not yet implemented, provide a default health endpoint
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' })

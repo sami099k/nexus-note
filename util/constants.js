@@ -1,6 +1,7 @@
 const ROLES = {
   USER: 'USER',
   SUBJECT_ADMIN: 'SUBJECT_ADMIN',
+  ADMIN: 'ADMIN',
   OWNER: 'OWNER'
 }
 

@@ -3,13 +3,19 @@ const User = require('../models/User')
 
 const authMiddleware = async (req, res, next) => {
   try {
+    let token = ''
     const authHeader = req.headers.authorization || ''
 
-    if (!authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'Missing or invalid authorization header' })
+    if (authHeader.startsWith('Bearer ')) {
+      token = authHeader.replace('Bearer ', '').trim()
+    } else if (req.query.token) {
+      token = req.query.token
     }
 
-    const token = authHeader.replace('Bearer ', '').trim()
+    if (!token) {
+      return res.status(401).json({ message: 'Missing or invalid authorization' })
+    }
+
     const jwtSecret = process.env.JWT_SECRET
 
     if (!jwtSecret) {
