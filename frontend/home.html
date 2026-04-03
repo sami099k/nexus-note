@@ -1,993 +1,1296 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NexusNotes Dashboard</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
-
-<style>
-:root {
-    --bg: #0d1117;
-    --bg-soft: #161b22;
-    --panel: #1f2630;
-    --line: #30363d;
-    --line-soft: #262c36;
-    --text: #e6edf3;
-    --muted: #9198a1;
-    --accent: #2f81f7;
-    --accent-soft: #0b3d91;
-    --success: #238636;
-    --danger: #f85149;
-}
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-    font-family: 'Space Grotesk', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-}
-
-.app-shell {
-    min-height: 100vh;
-    display: grid;
-    grid-template-columns: 280px 1fr;
-}
-
-.sidebar {
-    background: var(--bg-soft);
-    border-right: 1px solid var(--line);
-    padding: 20px 14px;
-}
-
-.brand {
-    display: block;
-    padding: 0 8px 16px;
-    border-bottom: 1px solid var(--line-soft);
-    margin-bottom: 16px;
-}
-
-.brand-name {
-    font-family: 'Fraunces', serif;
-    font-size: 1.2rem;
-    letter-spacing: 0.01em;
-}
-
-.brand-sub {
-    margin-top: 4px;
-    color: var(--muted);
-    font-size: 0.78rem;
-}
-
-.nav-group-title {
-    color: var(--muted);
-    font-size: 0.77rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin: 14px 8px 8px;
-}
-
-.nav {
-    list-style: none;
-    display: grid;
-    gap: 6px;
-}
-
-.nav a {
-    color: #c9d1d9;
-    text-decoration: none;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 9px 10px;
-    border-radius: 8px;
-    border: 1px solid transparent;
-}
-
-.nav-main {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.nav-icon {
-    width: 15px;
-    height: 15px;
-    flex-shrink: 0;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: 15px 15px;
-    opacity: 0.9;
-}
-
-.icon-dashboard { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23c9d1d9' d='M1.75 2A1.75 1.75 0 0 0 0 3.75v8.5C0 13.216.784 14 1.75 14h12.5A1.75 1.75 0 0 0 16 12.25v-8.5A1.75 1.75 0 0 0 14.25 2H1.75Zm0 1.5h12.5c.138 0 .25.112.25.25v8.5a.25.25 0 0 1-.25.25H1.75a.25.25 0 0 1-.25-.25v-8.5c0-.138.112-.25.25-.25ZM3 5.25A.75.75 0 0 1 3.75 4.5h3a.75.75 0 0 1 0 1.5h-3A.75.75 0 0 1 3 5.25Zm0 3A.75.75 0 0 1 3.75 7.5h4.5a.75.75 0 0 1 0 1.5h-4.5A.75.75 0 0 1 3 8.25Zm0 3A.75.75 0 0 1 3.75 10.5h7a.75.75 0 0 1 0 1.5h-7A.75.75 0 0 1 3 11.25Z'/%3E%3C/svg%3E"); }
-.icon-subjects { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23c9d1d9' d='M2 2.75A1.75 1.75 0 0 1 3.75 1h8.5A1.75 1.75 0 0 1 14 2.75v10.5A1.75 1.75 0 0 1 12.25 15h-8.5A1.75 1.75 0 0 1 2 13.25V2.75Zm1.75-.25a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25V2.75a.25.25 0 0 0-.25-.25h-8.5ZM4.5 4.5h7a.75.75 0 0 1 0 1.5h-7a.75.75 0 0 1 0-1.5Zm0 3h7a.75.75 0 0 1 0 1.5h-7a.75.75 0 0 1 0-1.5Zm0 3h4a.75.75 0 0 1 0 1.5h-4a.75.75 0 0 1 0-1.5Z'/%3E%3C/svg%3E"); }
-.icon-feed { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23c9d1d9' d='M2.1 5.5A1.4 1.4 0 1 1 .7 4.1 1.4 1.4 0 0 1 2.1 5.5Zm0 4.7A1.4 1.4 0 1 1 .7 8.8a1.4 1.4 0 0 1 1.4 1.4Zm0 4.8A1.4 1.4 0 1 1 .7 13.6a1.4 1.4 0 0 1 1.4 1.4Zm2.6-9.8v1.6h10.5V5.2H4.7Zm0 4.7v1.6h10.5V9.9H4.7Zm0 4.8v1.6h7.5v-1.6H4.7Z'/%3E%3C/svg%3E"); }
-.icon-profile { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23c9d1d9' d='M8 8.25A3.25 3.25 0 1 0 8 1.75a3.25 3.25 0 0 0 0 6.5Zm0 1.5c-3.2 0-5.75 1.72-5.75 3.92V15h11.5v-.33c0-2.2-2.55-3.92-5.75-3.92Z'/%3E%3C/svg%3E"); }
-.icon-logout { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23c9d1d9' d='M6.75 1.5A1.75 1.75 0 0 0 5 3.25v1.5a.75.75 0 0 0 1.5 0v-1.5c0-.138.112-.25.25-.25h5.5c.138 0 .25.112.25.25v8.5a.25.25 0 0 1-.25.25h-5.5a.25.25 0 0 1-.25-.25v-1.5a.75.75 0 0 0-1.5 0v1.5A1.75 1.75 0 0 0 6.75 14h5.5A1.75 1.75 0 0 0 14 12.25v-8.5A1.75 1.75 0 0 0 12.25 2h-5.5ZM8.28 5.22a.75.75 0 0 0-1.06 1.06L8.19 7.25H1.75a.75.75 0 0 0 0 1.5h6.44L7.22 9.72a.75.75 0 1 0 1.06 1.06l2.25-2.25a.75.75 0 0 0 0-1.06L8.28 5.22Z'/%3E%3C/svg%3E"); }
-
-.nav a:hover {
-    background: #222b36;
-    border-color: #2b3542;
-}
-
-.nav a.active {
-    background: #1a2f27;
-    border-color: #2f9e6f;
-    color: #ffffff;
-}
-
-.nav a.logout {
-    color: #ffb3ad;
-    background: #2a1f23;
-    border-color: #5b2a2f;
-}
-
-.nav a.logout:hover {
-    background: #3a242a;
-    border-color: #84414b;
-}
-
-.pill {
-    min-width: 22px;
-    height: 20px;
-    border-radius: 999px;
-    background: #222b36;
-    border: 1px solid #2f3a48;
-    color: var(--muted);
-    font-size: 0.72rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 7px;
-}
-
-.main {
-    padding: 18px 22px 28px;
-}
-
-.topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 16px;
-}
-
-.search-wrap {
-    flex: 1;
-    max-width: 480px;
-    min-width: 260px;
-}
-
-.search {
-    width: 100%;
-    background: #0d1117;
-    color: var(--text);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 10px 12px;
-    outline: none;
-}
-
-.search:focus {
-    border-color: var(--accent);
-}
-
-.top-actions {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
-.user-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    border: 1px solid var(--line);
-    background: #121821;
-    border-radius: 999px;
-    padding: 6px 10px;
-    color: var(--muted);
-    font-size: 0.84rem;
-    max-width: 290px;
-}
-
-.user-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #3fb950;
-    flex-shrink: 0;
-}
-
-.user-label {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.btn {
-    border: 1px solid var(--line);
-    background: #212830;
-    color: var(--text);
-    border-radius: 8px;
-    padding: 9px 12px;
-    font-weight: 600;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.btn:hover { border-color: #3b4552; }
-
-.btn-primary {
-    background: var(--accent);
-    border-color: #2f81f7;
-    color: #ffffff;
-}
-
-.btn-danger {
-    background: #2a1f23;
-    border-color: #5b2a2f;
-    color: #ffb3ad;
-}
-
-.btn-danger:hover {
-    background: #3a242a;
-    border-color: #84414b;
-}
-
-.hero {
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    background: var(--bg-soft);
-    padding: 16px;
-    margin-bottom: 16px;
-}
-
-.hero h1 {
-    font-size: 1.2rem;
-    margin-bottom: 6px;
-}
-
-.hero p {
-    color: var(--muted);
-    line-height: 1.5;
-}
-
-.kpi-row {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
-    margin-top: 12px;
-}
-
-.kpi {
-    border: 1px solid var(--line-soft);
-    border-radius: 8px;
-    background: #10161d;
-    padding: 10px;
-}
-
-.kpi-label {
-    font-size: 0.78rem;
-    color: var(--muted);
-    margin-bottom: 6px;
-}
-
-.kpi-value {
-    font-size: 1.25rem;
-    font-weight: 700;
-}
-
-.content-grid {
-    display: grid;
-    grid-template-columns: 1.6fr 1fr;
-    gap: 14px;
-}
-
-.card {
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    background: var(--bg-soft);
-}
-
-.card-header {
-    padding: 12px 14px;
-    border-bottom: 1px solid var(--line-soft);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.card-title {
-    font-weight: 700;
-}
-
-.card-body {
-    padding: 12px 14px;
-}
-
-.subject-shell { display: grid; gap: 12px; }
-.subject-sections { display: grid; gap: 12px; }
-.subject-section-title { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px; }
-.subject-section-title h3 { font-size: 0.95rem; font-weight: 700; }
-.subject-section-title span { color: var(--muted); font-size: 0.82rem; }
-.repo-list { display: grid; gap: 10px; }
-.repo-item { border: 1px solid var(--line-soft); border-radius: 10px; background: #111820; padding: 12px; cursor: pointer; display: grid; gap: 8px; }
-.repo-item:hover { border-color: #3b4552; background: #121b25; }
-.repo-top { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: flex-start; }
-.repo-title { font-weight: 700; line-height: 1.25; }
-.repo-link { color: inherit; text-decoration: none; }
-.repo-link:hover { color: #b9f3dc; text-decoration: underline; text-decoration-color: #2f9e6f; }
-.repo-desc { color: #c7d0da; line-height: 1.45; }
-.repo-badges { display: flex; flex-wrap: wrap; gap: 6px; }
-.badge { border-radius: 999px; border: 1px solid #2a3340; color: #9db8d6; background: #101820; padding: 4px 8px; font-size: 0.76rem; }
-.badge-accent { border-color: #33517d; background: var(--accent-soft); color: #b9d6ff; }
-.badge-muted { border-color: #2f3a48; background: #222b36; color: var(--muted); }
-.repo-actions { display: inline-flex; gap: 8px; align-items: center; justify-content: flex-end; flex-wrap: wrap; }
-.repo-actions .btn { padding: 7px 10px; font-size: 0.82rem; }
-
-.list {
-    display: grid;
-    gap: 9px;
-}
-
-.list-item {
-    border: 1px solid var(--line-soft);
-    border-radius: 8px;
-    background: #111820;
-    padding: 10px;
-}
-
-.list-item strong {
-    display: block;
-    margin-bottom: 4px;
-}
-
-.trend-link {
-    color: #b9f3dc;
-    text-decoration: underline;
-    text-decoration-color: #2f9e6f;
-}
-
-.trend-link:hover {
-    color: #dff9ee;
-    text-decoration-color: #67c497;
-}
-
-.muted { color: var(--muted); }
-
-.placeholder {
-    border: 1px dashed var(--line);
-    border-radius: 8px;
-    padding: 11px;
-    color: var(--muted);
-    background: #10161d;
-}
-
-.error {
-    border: 1px solid #663338;
-    border-radius: 8px;
-    padding: 11px;
-    color: #ffb4b9;
-    background: #23181b;
-}
-
-.footer-note {
-    margin-top: 14px;
-    color: var(--muted);
-    font-size: 0.88rem;
-}
-
-.modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(13, 17, 23, 0.6);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-.modal-content {
-    background: var(--bg-soft);
-    padding: 24px;
-    border-radius: 12px;
-    border: 1px solid var(--line);
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
-}
-
-.modal-title {
-    font-size: 1.25rem;
-    margin-bottom: 10px;
-}
-
-.modal-body {
-    color: var(--muted);
-    margin-bottom: 24px;
-}
-
-.modal-actions {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-}
-
-.user-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #3fb950;
-    flex-shrink: 0;
-}
-
-@media (max-width: 1020px) {
-    .app-shell {
-        grid-template-columns: 1fr;
-    }
-
-    .sidebar {
-        border-right: 0;
-        border-bottom: 1px solid var(--line);
-    }
-
-    .content-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .kpi-row {
-        grid-template-columns: 1fr;
-    }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusNotes Dashboard</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root[data-theme="neon-dark"] {
+            --bg: #0f0c29;
+            --bg-soft: rgba(22, 27, 34, 0.75);
+            --panel: rgba(31, 38, 48, 0.8);
+            --line: rgba(48, 54, 61, 0.6);
+            --line-soft: rgba(38, 44, 54, 0.5);
+            --text: #e6edf3;
+            --muted: #9198a1;
+            --accent: #2f81f7;
+            --accent-soft: rgba(11, 61, 145, 0.6);
+            --success: #238636;
+            --danger: #f85149;
+            --card-shadow: none;
+            --glass-blur: blur(10px);
+        }
+
+        :root[data-theme="sepia"] {
+            --bg: #F4ECD8;
+            --bg-soft: #E5D3B3;
+            --panel: #DBC9A7;
+            --line: #D1BFA0;
+            --line-soft: #E5D3B3;
+            --text: #5B4636;
+            --muted: #8C735B;
+            --accent: #A16207;
+            --accent-soft: #FDE68A;
+            --success: #166534;
+            --danger: #991B1B;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --glass-blur: none;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            line-height: 1.6;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        [data-theme="neon-dark"] body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+            background-size: 22px 22px;
+        }
+
+        [data-theme="neon-dark"] body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse 220px 220px at 15% 15%, rgba(127,119,221,0.28) 0%, transparent 70%),
+                radial-gradient(ellipse 160px 160px at 80% 75%, rgba(15,110,86,0.22) 0%, transparent 70%),
+                radial-gradient(ellipse 120px 120px at 75% 20%, rgba(24,95,165,0.20) 0%, transparent 70%);
+        }
+
+        body > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .card {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: var(--card, var(--bg-soft));
+            box-shadow: var(--card-shadow);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+        }
+
+        .sidebar {
+            background: var(--bg-soft);
+            border-right: 1px solid var(--line);
+            padding: 20px 14px;
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+        }
+
+        .hero, .kpi, .repo-item, .list-item, .user-badge, .search, .theme-toggle {
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+        }
+
+        [data-theme="neon-dark"] .repo-item,
+        [data-theme="neon-dark"] .list-item,
+        [data-theme="neon-dark"] .kpi,
+        [data-theme="neon-dark"] .placeholder {
+            background: rgba(16, 22, 29, 0.4);
+        }
+
+        [data-theme="neon-dark"] .search {
+            background: rgba(13, 17, 23, 0.6);
+        }
+
+        [data-theme="sepia"] .card {
+            --card: #FFF8E7;
+        }
+
+        [data-theme="sepia"] .repo-item,
+        [data-theme="sepia"] .list-item,
+        [data-theme="sepia"] .kpi,
+        [data-theme="sepia"] .placeholder {
+            background: #FFF8E7;
+        }
+
+        [data-theme="sepia"] a {
+            color: var(--accent);
+        }
+
+        [data-theme="sepia"] a:hover {
+            text-decoration: underline;
+        }
+
+        .theme-toggle {
+            background: var(--bg-soft);
+            border: 1px solid var(--line);
+            color: var(--text);
+            padding: 8px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--accent);
+        }
+
+        .theme-icon {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        .app-shell {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+        }
+
+        .sidebar {
+            background: var(--bg-soft);
+            border-right: 1px solid var(--line);
+            padding: 20px 14px;
+        }
+
+        .brand {
+            display: block;
+            padding: 0 8px 16px;
+            border-bottom: 1px solid var(--line-soft);
+            margin-bottom: 16px;
+        }
+
+        .brand-name {
+            font-family: 'Fraunces', serif;
+            font-size: 1.2rem;
+            letter-spacing: 0.01em;
+        }
+
+        .brand-sub {
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: 0.78rem;
+        }
+
+        .nav-group-title {
+            color: var(--muted);
+            font-size: 0.77rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin: 14px 8px 8px;
+        }
+
+        .nav {
+            list-style: none;
+            display: grid;
+            gap: 6px;
+        }
+
+        .nav a {
+            color: var(--text);
+            opacity: 0.85;
+            text-decoration: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 9px 10px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+        }
+
+        .nav a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 1;
+        }
+
+        [data-theme="sepia"] .nav a:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-main {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-icon {
+            width: 15px;
+            height: 15px;
+            flex-shrink: 0;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: 15px 15px;
+            opacity: 0.9;
+        }
+
+        .icon-dashboard {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23c9d1d9' d='M1.75 2A1.75 1.75 0 0 0 0 3.75v8.5C0 13.216.784 14 1.75 14h12.5A1.75 1.75 0 0 0 16 12.25v-8.5A1.75 1.75 0 0 0 14.25 2H1.75Zm0 1.5h12.5c.138 0 .25.112.25.25v8.5a.25.25 0 0 1-.25.25H1.75a.25.25 0 0 1-.25-.25v-8.5c0-.138.112-.25.25-.25ZM3 5.25A.75.75 0 0 1 3.75 4.5h3a.75.75 0 0 1 0 1.5h-3A.75.75 0 0 1 3 5.25Zm0 3A.75.75 0 0 1 3.75 7.5h4.5a.75.75 0 0 1 0 1.5h-4.5A.75.75 0 0 1 3 8.25Zm0 3A.75.75 0 0 1 3.75 10.5h7a.75.75 0 0 1 0 1.5h-7A.75.75 0 0 1 3 11.25Z'/%3E%3C/svg%3E");
+        }
+
+        .icon-subjects {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23c9d1d9' d='M2 2.75A1.75 1.75 0 0 1 3.75 1h8.5A1.75 1.75 0 0 1 14 2.75v10.5A1.75 1.75 0 0 1 12.25 15h-8.5A1.75 1.75 0 0 1 2 13.25V2.75Zm1.75-.25a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25V2.75a.25.25 0 0 0-.25-.25h-8.5ZM4.5 4.5h7a.75.75 0 0 1 0 1.5h-7a.75.75 0 0 1 0-1.5Zm0 3h7a.75.75 0 0 1 0 1.5h-7a.75.75 0 0 1 0-1.5Zm0 3h4a.75.75 0 0 1 0 1.5h-4a.75.75 0 0 1 0-1.5Z'/%3E%3C/svg%3E");
+        }
+
+        .icon-feed {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23c9d1d9' d='M2.1 5.5A1.4 1.4 0 1 1 .7 4.1 1.4 1.4 0 0 1 2.1 5.5Zm0 4.7A1.4 1.4 0 1 1 .7 8.8a1.4 1.4 0 0 1 1.4 1.4Zm0 4.8A1.4 1.4 0 1 1 .7 13.6a1.4 1.4 0 0 1 1.4 1.4Zm2.6-9.8v1.6h10.5V5.2H4.7Zm0 4.7v1.6h10.5V9.9H4.7Zm0 4.8v1.6h7.5v-1.6H4.7Z'/%3E%3C/svg%3E");
+        }
+
+        .icon-profile {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23c9d1d9' d='M8 8.25A3.25 3.25 0 1 0 8 1.75a3.25 3.25 0 0 0 0 6.5Zm0 1.5c-3.2 0-5.75 1.72-5.75 3.92V15h11.5v-.33c0-2.2-2.55-3.92-5.75-3.92Z'/%3E%3C/svg%3E");
+        }
+
+        .icon-logout {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23c9d1d9' d='M6.75 1.5A1.75 1.75 0 0 0 5 3.25v1.5a.75.75 0 0 0 1.5 0v-1.5c0-.138.112-.25.25-.25h5.5c.138 0 .25.112.25.25v8.5a.25.25 0 0 1-.25.25h-5.5a.25.25 0 0 1-.25-.25v-1.5a.75.75 0 0 0-1.5 0v1.5A1.75 1.75 0 0 0 6.75 14h5.5A1.75 1.75 0 0 0 14 12.25v-8.5A1.75 1.75 0 0 0 12.25 2h-5.5ZM8.28 5.22a.75.75 0 0 0-1.06 1.06L8.19 7.25H1.75a.75.75 0 0 0 0 1.5h6.44L7.22 9.72a.75.75 0 1 0 1.06 1.06l2.25-2.25a.75.75 0 0 0 0-1.06L8.28 5.22Z'/%3E%3C/svg%3E");
+        }
+
+        .nav a:hover {
+            background: #222b36;
+            border-color: #2b3542;
+        }
+
+        .nav a.active {
+            background: #1a2f27;
+            border-color: #2f9e6f;
+            color: #ffffff;
+        }
+
+        .nav a.logout {
+            color: #ffb3ad;
+            background: #2a1f23;
+            border-color: #5b2a2f;
+        }
+
+        .nav a.logout:hover {
+            background: #3a242a;
+            border-color: #84414b;
+        }
+
+        .pill {
+            min-width: 22px;
+            height: 20px;
+            border-radius: 999px;
+            background: #222b36;
+            border: 1px solid #2f3a48;
+            color: var(--muted);
+            font-size: 0.72rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 7px;
+        }
+
+        .main {
+            padding: 18px 22px 28px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .search-wrap {
+            flex: 1;
+            max-width: 480px;
+            min-width: 260px;
+        }
+
+        .search {
+            width: 100%;
+            background: #0d1117;
+            color: var(--text);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 10px 12px;
+            outline: none;
+        }
+
+        .search:focus {
+            border-color: var(--accent);
+        }
+
+        .top-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .user-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--line);
+            background: #121821;
+            border-radius: 999px;
+            padding: 6px 10px;
+            color: var(--muted);
+            font-size: 0.84rem;
+            max-width: 290px;
+        }
+
+        .user-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #3fb950;
+            flex-shrink: 0;
+        }
+
+        .user-label {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .btn {
+            border: 1px solid var(--line);
+            background: #212830;
+            color: var(--text);
+            border-radius: 8px;
+            padding: 9px 12px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            border-color: #3b4552;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            border-color: #2f81f7;
+            color: #ffffff;
+        }
+
+        .btn-danger {
+            background: #2a1f23;
+            border-color: #5b2a2f;
+            color: #ffb3ad;
+        }
+
+        .btn-danger:hover {
+            background: #3a242a;
+            border-color: #84414b;
+        }
+
+        .hero {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: var(--bg-soft);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .hero h1 {
+            font-size: 1.2rem;
+            margin-bottom: 6px;
+        }
+
+        .hero p {
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .kpi {
+            border: 1px solid var(--line-soft);
+            border-radius: 8px;
+            background: #10161d;
+            padding: 10px;
+        }
+
+        .kpi-label {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .kpi-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 14px;
+        }
+
+        .card {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: var(--bg-soft);
+        }
+
+        .card-header {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--line-soft);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-weight: 700;
+        }
+
+        .card-body {
+            padding: 12px 14px;
+        }
+
+        .subject-shell {
+            display: grid;
+            gap: 12px;
+        }
+
+        .subject-sections {
+            display: grid;
+            gap: 12px;
+        }
+
+        .subject-section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .subject-section-title h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .subject-section-title span {
+            color: var(--muted);
+            font-size: 0.82rem;
+        }
+
+        .repo-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .repo-item {
+            border: 1px solid var(--line-soft);
+            border-radius: 10px;
+            background: #111820;
+            padding: 12px;
+            cursor: pointer;
+            display: grid;
+            gap: 8px;
+        }
+
+        .repo-item:hover {
+            border-color: #3b4552;
+            background: #121b25;
+        }
+
+        .repo-top {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .repo-title {
+            font-weight: 700;
+            line-height: 1.25;
+        }
+
+        .repo-link {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .repo-link:hover {
+            color: #b9f3dc;
+            text-decoration: underline;
+            text-decoration-color: #2f9e6f;
+        }
+
+        .repo-desc {
+            color: #c7d0da;
+            line-height: 1.45;
+        }
+
+        .repo-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .badge {
+            border-radius: 999px;
+            border: 1px solid #2a3340;
+            color: #9db8d6;
+            background: #101820;
+            padding: 4px 8px;
+            font-size: 0.76rem;
+        }
+
+        .badge-accent {
+            border-color: #33517d;
+            background: var(--accent-soft);
+            color: #b9d6ff;
+        }
+
+        .badge-muted {
+            border-color: #2f3a48;
+            background: #222b36;
+            color: var(--muted);
+        }
+
+        .repo-actions {
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .repo-actions .btn {
+            padding: 7px 10px;
+            font-size: 0.82rem;
+        }
+
+        .list {
+            display: grid;
+            gap: 9px;
+        }
+
+        .list-item {
+            border: 1px solid var(--line-soft);
+            border-radius: 8px;
+            background: #111820;
+            padding: 10px;
+        }
+
+        .list-item strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .trend-link {
+            color: #b9f3dc;
+            text-decoration: underline;
+            text-decoration-color: #2f9e6f;
+        }
+
+        .trend-link:hover {
+            color: #dff9ee;
+            text-decoration-color: #67c497;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .placeholder {
+            border: 1px dashed var(--line);
+            border-radius: 8px;
+            padding: 11px;
+            color: var(--muted);
+            background: #10161d;
+        }
+
+        .error {
+            border: 1px solid #663338;
+            border-radius: 8px;
+            padding: 11px;
+            color: #ffb4b9;
+            background: #23181b;
+        }
+
+        .footer-note {
+            margin-top: 14px;
+            color: var(--muted);
+            font-size: 0.88rem;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(13, 17, 23, 0.6);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--bg-soft);
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            margin-bottom: 10px;
+        }
+
+        .modal-body {
+            color: var(--muted);
+            margin-bottom: 24px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .user-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #3fb950;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 1020px) {
+            .app-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                border-right: 0;
+                border-bottom: 1px solid var(--line);
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .kpi-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
 </head>
+
 <body>
-<div class="app-shell">
-    <aside class="sidebar">
-        <div class="brand">
-            <div class="brand-name">NexusNotes</div>
-            <div class="brand-sub">Learning Workspace</div>
-        </div>
-
-        <div class="nav-group-title">Workspace</div>
-        <ul class="nav">
-            <li><a href="home.html" class="active"><span class="nav-main"><span class="nav-icon icon-dashboard"></span><span>Dashboard</span></span><span class="pill" id="navSubjectCount">0</span></a></li>
-            <li><a href="subject.html"><span class="nav-main"><span class="nav-icon icon-subjects"></span><span>Subjects</span></span></a></li>
-            <li><a href="tech-feed.html"><span class="nav-main"><span class="nav-icon icon-feed"></span><span>Tech Feed</span></span></a></li>
-            <li><a href="profile.html"><span class="nav-main"><span class="nav-icon icon-profile"></span><span>My Profile</span></span></a></li>
-            <li><a class="logout" href="#" onclick="handleLogout(event); return false;"><span class="nav-main"><span class="nav-icon icon-logout"></span><span>Logout</span></span></a></li>
-        </ul>
-
-        <div class="nav-group-title">Subject Bases</div>
-        <ul class="nav">
-            <li><a href="#myBases"><span class="nav-main"><span>My Bases</span></span></a></li>
-            <li><a href="#joinedBases"><span class="nav-main"><span>Joined Bases</span></span></a></li>
-            <li><a href="#exploreBases"><span class="nav-main"><span>Explore Public</span></span></a></li>
-            <li><a href="create.html"><span class="nav-main"><span>Create New</span></span></a></li>
-        </ul>
-    </aside>
-
-    <main class="main">
-        <div class="topbar">
-            <div class="search-wrap">
-                <input id="searchInput" class="search" placeholder="Search subjects by name or code" oninput="filterSubjects()">
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-name">NexusNotes</div>
+                <div class="brand-sub">Learning Workspace</div>
             </div>
-            <div class="top-actions">
-                <a class="user-badge" href="profile.html"><span class="user-dot"></span><span class="user-label" id="userName">Signed in</span></a>
-            </div>
-        </div>
 
-        <section class="hero">
-            <h1>Overview</h1>
-            <p>Keep track of your subjects, recent resources, and trend signals in a single dark workspace.</p>
-            <div class="kpi-row">
-                <div class="kpi">
-                    <div class="kpi-label">Subjects</div>
-                    <div class="kpi-value" id="subjectCount">0</div>
+            <div class="nav-group-title">Workspace</div>
+            <ul class="nav">
+                <li><a href="home.html" class="active"><span class="nav-main"><span
+                                class="nav-icon icon-dashboard"></span><span>Dashboard</span></span><span class="pill"
+                            id="navSubjectCount">0</span></a></li>
+                <li><a href="subject.html"><span class="nav-main"><span
+                                class="nav-icon icon-subjects"></span><span>Subjects</span></span></a></li>
+                <li><a href="tech-feed.html"><span class="nav-main"><span class="nav-icon icon-feed"></span><span>Tech
+                                Feed</span></span></a></li>
+                <li><a href="profile.html"><span class="nav-main"><span class="nav-icon icon-profile"></span><span>My
+                                Profile</span></span></a></li>
+                <li><a class="logout" href="#" onclick="handleLogout(event); return false;"><span class="nav-main"><span
+                                class="nav-icon icon-logout"></span><span>Logout</span></span></a></li>
+            </ul>
+
+            <div class="nav-group-title">Subject Bases</div>
+            <ul class="nav">
+                <li><a href="#myBases"><span class="nav-main"><span>My Bases</span></span></a></li>
+                <li><a href="#joinedBases"><span class="nav-main"><span>Joined Bases</span></span></a></li>
+                <li><a href="#exploreBases"><span class="nav-main"><span>Explore Public</span></span></a></li>
+                <li><a href="create.html"><span class="nav-main"><span>Create New</span></span></a></li>
+            </ul>
+        </aside>
+
+        <main class="main">
+            <div class="topbar">
+                <div class="search-wrap">
+                    <input id="searchInput" class="search" placeholder="Search subjects by name or code"
+                        oninput="filterSubjects()">
                 </div>
-                <div class="kpi">
-                    <div class="kpi-label">Tech Trends</div>
-                    <div class="kpi-value" id="trendCount">0</div>
-                </div>
-                <div class="kpi">
-                    <div class="kpi-label">Recent Uploads</div>
-                    <div class="kpi-value" id="uploadCount">0</div>
+                <div class="top-actions">
+                    <button class="theme-toggle" onclick="handleThemeToggle()" title="Toggle Theme">
+                        <svg class="theme-icon moon-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                        <svg class="theme-icon sun-icon" style="display:none;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="18.36" x2="5.64" y2="16.92"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                    </button>
+                    <a class="user-badge" href="profile.html"><span class="user-dot"></span><span class="user-label"
+                            id="userName">Signed in</span></a>
                 </div>
             </div>
-        </section>
 
-        <section class="content-grid">
-            <section class="card">
-                <div class="card-header">
-                    <h2 class="card-title">Available Subject Bases</h2>
-                    <span class="muted" id="subjectStatus">Loading...</span>
-                </div>
-                <div class="card-body">
-                    <div class="subject-shell" id="subjectCards">
-                        <div class="subject-sections">
-                            <div>
-                                <div class="subject-section-title" id="myBases"><h3>My Subject Bases</h3><span id="mySubjectsCount">0</span></div>
-                                <div class="repo-list" id="mySubjectsList"><div class="placeholder">Loading...</div></div>
-                            </div>
-                            <div>
-                                <div class="subject-section-title" id="joinedBases"><h3>Joined Subject Bases</h3><span id="joinedSubjectsCount">0</span></div>
-                                <div class="repo-list" id="joinedSubjectsList"><div class="placeholder">Loading...</div></div>
-                            </div>
-                            <div>
-                                <div class="subject-section-title" id="exploreBases"><h3>Explore Public</h3><span id="exploreSubjectsCount">0</span></div>
-                                <div class="repo-list" id="exploreSubjectsList"><div class="placeholder">Loading...</div></div>
-                            </div>
-                        </div>
+            <section class="hero">
+                <h1>Overview</h1>
+                <p>Keep track of your subjects, recent resources, and trend signals in a single dark workspace.</p>
+                <div class="kpi-row">
+                    <div class="kpi">
+                        <div class="kpi-label">Subjects</div>
+                        <div class="kpi-value" id="subjectCount">0</div>
+                    </div>
+                    <div class="kpi">
+                        <div class="kpi-label">Tech Trends</div>
+                        <div class="kpi-value" id="trendCount">0</div>
+                    </div>
+                    <div class="kpi">
+                        <div class="kpi-label">Recent Uploads</div>
+                        <div class="kpi-value" id="uploadCount">0</div>
                     </div>
                 </div>
             </section>
 
-            <div style="display:grid; gap:14px;">
+            <section class="content-grid">
                 <section class="card">
                     <div class="card-header">
-                        <h2 class="card-title">Tech Trends</h2>
+                        <h2 class="card-title">Available Subject Bases</h2>
+                        <span class="muted" id="subjectStatus">Loading...</span>
                     </div>
                     <div class="card-body">
-                        <div class="list" id="techTrendsContainer">
-                            <div class="placeholder">Loading trends...</div>
+                        <div class="subject-shell" id="subjectCards">
+                            <div class="subject-sections">
+                                <div>
+                                    <div class="subject-section-title" id="myBases">
+                                        <h3>My Subject Bases</h3><span id="mySubjectsCount">0</span>
+                                    </div>
+                                    <div class="repo-list" id="mySubjectsList">
+                                        <div class="placeholder">Loading...</div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="subject-section-title" id="joinedBases">
+                                        <h3>Joined Subject Bases</h3><span id="joinedSubjectsCount">0</span>
+                                    </div>
+                                    <div class="repo-list" id="joinedSubjectsList">
+                                        <div class="placeholder">Loading...</div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="subject-section-title" id="exploreBases">
+                                        <h3>Explore Public</h3><span id="exploreSubjectsCount">0</span>
+                                    </div>
+                                    <div class="repo-list" id="exploreSubjectsList">
+                                        <div class="placeholder">Loading...</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>
 
-                <section class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Recent Uploads</h2>
-                    </div>
-                    <div class="card-body">
-                        <div class="list" id="recentUploads">
-                            <div class="placeholder">Loading uploads...</div>
+                <div style="display:grid; gap:14px;">
+                    <section class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Tech Trends</h2>
                         </div>
-                    </div>
-                </section>
+                        <div class="card-body">
+                            <div class="list" id="techTrendsContainer">
+                                <div class="placeholder">Loading trends...</div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Recent Uploads</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="list" id="recentUploads">
+                                <div class="placeholder">Loading uploads...</div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </section>
+
+            <p class="footer-note">NexusNotes Dashboard</p>
+        </main>
+    </div>
+
+    <div id="logout-modal" class="modal-backdrop">
+        <div class="modal-content">
+            <h2 class="modal-title">Confirm Logout</h2>
+            <p class="modal-body">Are you sure you want to log out?</p>
+            <div class="modal-actions">
+                <button id="cancel-logout" class="btn">Cancel</button>
+                <button id="confirm-logout" class="btn btn-danger">Logout</button>
             </div>
-        </section>
-
-        <p class="footer-note">NexusNotes Dashboard</p>
-    </main>
-</div>
-
-<div id="logout-modal" class="modal-backdrop">
-    <div class="modal-content">
-        <h2 class="modal-title">Confirm Logout</h2>
-        <p class="modal-body">Are you sure you want to log out?</p>
-        <div class="modal-actions">
-            <button id="cancel-logout" class="btn">Cancel</button>
-            <button id="confirm-logout" class="btn btn-danger">Logout</button>
         </div>
     </div>
-</div>
 
-<script src="auth.js"></script>
-<script>
-let allSubjects = [];
-let trendsCount = 0;
-let uploadsCount = 0;
-let myMembershipSubjectIds = new Set();
-let activeUser = null;
+    <script src="auth.js"></script>
+    <script>
+        let allSubjects = [];
+        let trendsCount = 0;
+        let uploadsCount = 0;
+        let myMembershipSubjectIds = new Set();
+        let activeUser = null;
 
-function escapeHtml(value) {
-    return String(value || '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-}
-
-function forceLogout() {
-    window.NexusAuth && window.NexusAuth.clearSession && window.NexusAuth.clearSession();
-    window.location.href = 'index.html';
-}
-
-function showToast(message, type) {
-    if (window.NexusAuth && typeof window.NexusAuth.showToast === 'function') {
-        window.NexusAuth.showToast(message, type || 'info');
-    }
-}
-
-function sanitizeHttpUrl(value) {
-    if (!window.NexusAuth || typeof window.NexusAuth.sanitizeUrl !== 'function') {
-        return String(value || '').trim();
-    }
-    return window.NexusAuth.sanitizeUrl(value);
-}
-
-function handleLogout(event) {
-    if (event && typeof event.preventDefault === 'function') {
-        event.preventDefault();
-    }
-
-    if (window.NexusAuth && typeof window.NexusAuth.logout === 'function') {
-        window.NexusAuth.logout();
-        return;
-    }
-
-    // Fallback (should rarely happen if auth.js loaded)
-    if (window.confirm('Are you sure you want to log out?')) {
-        forceLogout();
-    }
-}
-
-function openSubject(id, name) {
-    window.location.href = 'subject.html?id=' + encodeURIComponent(id) + '&name=' + encodeURIComponent(name);
-}
-
-function openSubjectManage(id) {
-    window.location.href = 'subject.html?id=' + encodeURIComponent(id) + '&manage=1';
-}
-
-async function loadMyMemberships() {
-    try {
-        const response = await window.NexusAuth.apiFetch('/subjects/my-memberships', {
-            headers: { 'Content-Type': 'application/json' }
-        });
-
-        if (response.status === 401) {
-            forceLogout();
-            return;
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
         }
 
-        if (!response.ok) {
-            myMembershipSubjectIds = new Set();
-            return;
+        function forceLogout() {
+            window.NexusAuth && window.NexusAuth.clearSession && window.NexusAuth.clearSession();
+            window.location.href = 'index.html';
         }
 
-        const data = await window.NexusAuth.parseJsonSafe(response);
-        const ids = Array.isArray(data && data.subjectIds) ? data.subjectIds : [];
-        myMembershipSubjectIds = new Set(ids.map(String));
-    } catch (err) {
-        myMembershipSubjectIds = new Set();
-    }
-}
-
-function updateCounts() {
-    document.getElementById('subjectCount').textContent = String(allSubjects.length);
-    document.getElementById('trendCount').textContent = String(trendsCount);
-    document.getElementById('uploadCount').textContent = String(uploadsCount);
-    document.getElementById('navSubjectCount').textContent = String(allSubjects.length);
-    document.getElementById('subjectStatus').textContent = allSubjects.length + ' loaded';
-}
-
-function filterSubjects() {
-    const query = document.getElementById('searchInput').value.toLowerCase().trim();
-    if (!query) {
-        renderSubjectSections(allSubjects);
-        return;
-    }
-
-    const filtered = allSubjects.filter((subject) => {
-        const name = String(subject.name || '').toLowerCase();
-        const code = String(subject.code || '').toLowerCase();
-        return name.includes(query) || code.includes(query);
-    });
-
-    renderSubjectSections(filtered);
-    document.getElementById('subjectStatus').textContent = filtered.length + ' matched';
-}
-
-function getVisibility(subject) {
-    const v = String(subject && subject.visibility ? subject.visibility : 'PUBLIC').toUpperCase();
-    return (v === 'PRIVATE' || v === 'PUBLIC') ? v : 'PUBLIC';
-}
-
-function isCreatorOf(subject) {
-    if (!activeUser || !activeUser.id) return false;
-    return String(subject.createdBy || '') === String(activeUser.id);
-}
-
-function renderSubjectList(containerId, subjects, mode) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-
-    if (!subjects.length) {
-        container.innerHTML = '<div class="placeholder">Nothing here yet.</div>';
-        return;
-    }
-
-    container.innerHTML = subjects.map((subject) => {
-        const id = String(subject._id || '');
-        const name = escapeHtml(subject.name || 'Subject');
-        const desc = escapeHtml(subject.description || '');
-        const code = subject.code ? String(subject.code) : '';
-        const visibility = getVisibility(subject);
-        const isMember = id ? myMembershipSubjectIds.has(id) : false;
-        const mine = isCreatorOf(subject);
-        const href = id ? 'subject.html?id=' + encodeURIComponent(id) + '&name=' + encodeURIComponent(subject.name || 'Subject') : '';
-
-        const badges = [
-            code ? '<span class="badge badge-accent">' + escapeHtml(code) + '</span>' : '',
-            visibility === 'PRIVATE' ? '<span class="badge badge-muted">Private</span>' : '<span class="badge">Public</span>',
-            isMember ? '<span class="badge">Joined</span>' : ''
-        ].filter(Boolean).join('');
-
-        let actions = '';
-        if (mine) {
-            actions = (id ? '<button class="btn" data-action="open" data-id="' + escapeHtml(id) + '" data-name="' + name + '">Open</button>' : '')
-                + (id ? '<button class="btn" data-action="manage" data-id="' + escapeHtml(id) + '">Manage</button>' : '');
-        } else if (mode === 'explore') {
-            actions = isMember
-                ? '<button class="btn" data-action="open" data-id="' + escapeHtml(id) + '" data-name="' + name + '">Enter</button>'
-                : '<button class="btn btn-primary" data-action="join" data-id="' + escapeHtml(id) + '">Join</button>';
-        } else {
-            actions = isMember
-                ? '<button class="btn" data-action="open" data-id="' + escapeHtml(id) + '" data-name="' + name + '">Enter</button>'
-                    + '<button class="btn btn-danger" data-action="leave" data-id="' + escapeHtml(id) + '">Leave</button>'
-                : '<button class="btn btn-primary" data-action="join" data-id="' + escapeHtml(id) + '">Join</button>';
-        }
-
-        return '<div class="repo-item" data-id="' + escapeHtml(id) + '" data-name="' + name + '">'
-            + '<div class="repo-top">'
-            + '<div>'
-            + '<div class="repo-title">' + (href ? '<a class="repo-link" href="' + href + '">' + name + '</a>' : name) + '</div>'
-            + '<div class="repo-badges">' + badges + '</div>'
-            + '</div>'
-            + '<div class="repo-actions">' + actions + '</div>'
-            + '</div>'
-            + (desc ? '<div class="repo-desc">' + desc + '</div>' : '')
-            + '</div>';
-    }).join('');
-
-    container.querySelectorAll('.repo-item').forEach((item) => {
-        item.addEventListener('click', () => {
-            const id = item.dataset.id;
-            const name = item.dataset.name;
-            if (id) {
-                openSubject(id, name);
+        function showToast(message, type) {
+            if (window.NexusAuth && typeof window.NexusAuth.showToast === 'function') {
+                window.NexusAuth.showToast(message, type || 'info');
             }
-        });
-    });
+        }
 
-    container.querySelectorAll('[data-action]').forEach((btn) => {
-        btn.addEventListener('click', async (event) => {
-            event.stopPropagation();
+        function sanitizeHttpUrl(value) {
+            if (!window.NexusAuth || typeof window.NexusAuth.sanitizeUrl !== 'function') {
+                return String(value || '').trim();
+            }
+            return window.NexusAuth.sanitizeUrl(value);
+        }
 
-            const action = btn.dataset.action;
-            const id = btn.dataset.id;
-            if (!id) return;
+        function handleLogout(event) {
+            if (event && typeof event.preventDefault === 'function') {
+                event.preventDefault();
+            }
 
-            if (action === 'open') {
-                openSubject(id, btn.dataset.name || 'Subject');
+            if (window.NexusAuth && typeof window.NexusAuth.logout === 'function') {
+                window.NexusAuth.logout();
                 return;
             }
 
-            if (action === 'manage') {
-                openSubjectManage(id);
+            // Fallback (should rarely happen if auth.js loaded)
+            if (window.confirm('Are you sure you want to log out?')) {
+                forceLogout();
+            }
+        }
+
+        function openSubject(id, name) {
+            window.location.href = 'subject.html?id=' + encodeURIComponent(id) + '&name=' + encodeURIComponent(name);
+        }
+
+        function openSubjectManage(id) {
+            window.location.href = 'subject.html?id=' + encodeURIComponent(id) + '&manage=1';
+        }
+
+        async function loadMyMemberships() {
+            try {
+                const response = await window.NexusAuth.apiFetch('/subjects/my-memberships', {
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.status === 401) {
+                    forceLogout();
+                    return;
+                }
+
+                if (!response.ok) {
+                    myMembershipSubjectIds = new Set();
+                    return;
+                }
+
+                const data = await window.NexusAuth.parseJsonSafe(response);
+                const ids = Array.isArray(data && data.subjectIds) ? data.subjectIds : [];
+                myMembershipSubjectIds = new Set(ids.map(String));
+            } catch (err) {
+                myMembershipSubjectIds = new Set();
+            }
+        }
+
+        function updateCounts() {
+            document.getElementById('subjectCount').textContent = String(allSubjects.length);
+            document.getElementById('trendCount').textContent = String(trendsCount);
+            document.getElementById('uploadCount').textContent = String(uploadsCount);
+            document.getElementById('navSubjectCount').textContent = String(allSubjects.length);
+            document.getElementById('subjectStatus').textContent = allSubjects.length + ' loaded';
+        }
+
+        function filterSubjects() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (!query) {
+                renderSubjectSections(allSubjects);
                 return;
             }
 
-            if (action === 'join') {
-                btn.disabled = true;
-                const prevText = btn.textContent;
-                btn.textContent = 'Joining...';
-                try {
-                    const response = await window.NexusAuth.apiFetch('/subjects/' + encodeURIComponent(id) + '/join', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
+            const filtered = allSubjects.filter((subject) => {
+                const name = String(subject.name || '').toLowerCase();
+                const code = String(subject.code || '').toLowerCase();
+                return name.includes(query) || code.includes(query);
+            });
 
-                    if (response.status === 401) {
-                        forceLogout();
+            renderSubjectSections(filtered);
+            document.getElementById('subjectStatus').textContent = filtered.length + ' matched';
+        }
+
+        function getVisibility(subject) {
+            const v = String(subject && subject.visibility ? subject.visibility : 'PUBLIC').toUpperCase();
+            return (v === 'PRIVATE' || v === 'PUBLIC') ? v : 'PUBLIC';
+        }
+
+        function isCreatorOf(subject) {
+            if (!activeUser || !activeUser.id) return false;
+            return String(subject.createdBy || '') === String(activeUser.id);
+        }
+
+        function renderSubjectList(containerId, subjects, mode) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            if (!subjects.length) {
+                container.innerHTML = '<div class="placeholder">Nothing here yet.</div>';
+                return;
+            }
+
+            container.innerHTML = subjects.map((subject) => {
+                const id = String(subject._id || '');
+                const name = escapeHtml(subject.name || 'Subject');
+                const desc = escapeHtml(subject.description || '');
+                const code = subject.code ? String(subject.code) : '';
+                const visibility = getVisibility(subject);
+                const isMember = id ? myMembershipSubjectIds.has(id) : false;
+                const mine = isCreatorOf(subject);
+                const href = id ? 'subject.html?id=' + encodeURIComponent(id) + '&name=' + encodeURIComponent(subject.name || 'Subject') : '';
+
+                const badges = [
+                    code ? '<span class="badge badge-accent">' + escapeHtml(code) + '</span>' : '',
+                    visibility === 'PRIVATE' ? '<span class="badge badge-muted">Private</span>' : '<span class="badge">Public</span>',
+                    isMember ? '<span class="badge">Joined</span>' : ''
+                ].filter(Boolean).join('');
+
+                let actions = '';
+                if (mine) {
+                    actions = (id ? '<button class="btn" data-action="open" data-id="' + escapeHtml(id) + '" data-name="' + name + '">Open</button>' : '')
+                        + (id ? '<button class="btn" data-action="manage" data-id="' + escapeHtml(id) + '">Manage</button>' : '');
+                } else if (mode === 'explore') {
+                    actions = isMember
+                        ? '<button class="btn" data-action="open" data-id="' + escapeHtml(id) + '" data-name="' + name + '">Enter</button>'
+                        : '<button class="btn btn-primary" data-action="join" data-id="' + escapeHtml(id) + '">Join</button>';
+                } else {
+                    actions = isMember
+                        ? '<button class="btn" data-action="open" data-id="' + escapeHtml(id) + '" data-name="' + name + '">Enter</button>'
+                        + '<button class="btn btn-danger" data-action="leave" data-id="' + escapeHtml(id) + '">Leave</button>'
+                        : '<button class="btn btn-primary" data-action="join" data-id="' + escapeHtml(id) + '">Join</button>';
+                }
+
+                return '<div class="repo-item" data-id="' + escapeHtml(id) + '" data-name="' + name + '">'
+                    + '<div class="repo-top">'
+                    + '<div>'
+                    + '<div class="repo-title">' + (href ? '<a class="repo-link" href="' + href + '">' + name + '</a>' : name) + '</div>'
+                    + '<div class="repo-badges">' + badges + '</div>'
+                    + '</div>'
+                    + '<div class="repo-actions">' + actions + '</div>'
+                    + '</div>'
+                    + (desc ? '<div class="repo-desc">' + desc + '</div>' : '')
+                    + '</div>';
+            }).join('');
+
+            container.querySelectorAll('.repo-item').forEach((item) => {
+                item.addEventListener('click', () => {
+                    const id = item.dataset.id;
+                    const name = item.dataset.name;
+                    if (id) {
+                        openSubject(id, name);
+                    }
+                });
+            });
+
+            container.querySelectorAll('[data-action]').forEach((btn) => {
+                btn.addEventListener('click', async (event) => {
+                    event.stopPropagation();
+
+                    const action = btn.dataset.action;
+                    const id = btn.dataset.id;
+                    if (!id) return;
+
+                    if (action === 'open') {
+                        openSubject(id, btn.dataset.name || 'Subject');
                         return;
                     }
 
-                    if (response.ok) {
-                        myMembershipSubjectIds.add(String(id));
-                        renderSubjectSections(allSubjects);
-                        showToast('Joined subject base.', 'success');
-                    } else {
-                        showToast('Unable to join this subject base.', 'error');
-                        btn.textContent = prevText;
-                    }
-                } finally {
-                    btn.disabled = false;
-                }
-                return;
-            }
-
-            if (action === 'leave') {
-                btn.disabled = true;
-                const prevText = btn.textContent;
-                btn.textContent = 'Leaving...';
-                try {
-                    const response = await window.NexusAuth.apiFetch('/subjects/' + encodeURIComponent(id) + '/join', {
-                        method: 'DELETE',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-
-                    if (response.status === 401) {
-                        forceLogout();
+                    if (action === 'manage') {
+                        openSubjectManage(id);
                         return;
                     }
 
-                    if (response.ok) {
-                        myMembershipSubjectIds.delete(String(id));
-                        renderSubjectSections(allSubjects);
-                        showToast('Left subject base.', 'info');
-                    } else {
-                        showToast('Unable to leave this subject base.', 'error');
-                        btn.textContent = prevText;
+                    if (action === 'join') {
+                        btn.disabled = true;
+                        const prevText = btn.textContent;
+                        btn.textContent = 'Joining...';
+                        try {
+                            const response = await window.NexusAuth.apiFetch('/subjects/' + encodeURIComponent(id) + '/join', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' }
+                            });
+
+                            if (response.status === 401) {
+                                forceLogout();
+                                return;
+                            }
+
+                            if (response.ok) {
+                                myMembershipSubjectIds.add(String(id));
+                                renderSubjectSections(allSubjects);
+                                showToast('Joined subject base.', 'success');
+                            } else {
+                                showToast('Unable to join this subject base.', 'error');
+                                btn.textContent = prevText;
+                            }
+                        } finally {
+                            btn.disabled = false;
+                        }
+                        return;
                     }
-                } finally {
-                    btn.disabled = false;
-                }
+
+                    if (action === 'leave') {
+                        btn.disabled = true;
+                        const prevText = btn.textContent;
+                        btn.textContent = 'Leaving...';
+                        try {
+                            const response = await window.NexusAuth.apiFetch('/subjects/' + encodeURIComponent(id) + '/join', {
+                                method: 'DELETE',
+                                headers: { 'Content-Type': 'application/json' }
+                            });
+
+                            if (response.status === 401) {
+                                forceLogout();
+                                return;
+                            }
+
+                            if (response.ok) {
+                                myMembershipSubjectIds.delete(String(id));
+                                renderSubjectSections(allSubjects);
+                                showToast('Left subject base.', 'info');
+                            } else {
+                                showToast('Unable to leave this subject base.', 'error');
+                                btn.textContent = prevText;
+                            }
+                        } finally {
+                            btn.disabled = false;
+                        }
+                    }
+                });
+            });
+        }
+
+        function renderSubjectSections(subjects) {
+            const mine = subjects.filter((s) => isCreatorOf(s));
+            const joined = subjects.filter((s) => {
+                const id = String(s._id || '');
+                return id && myMembershipSubjectIds.has(id) && !isCreatorOf(s);
+            });
+            const explore = subjects.filter((s) => {
+                const id = String(s._id || '');
+                if (!id) return false;
+                if (isCreatorOf(s)) return false;
+                if (myMembershipSubjectIds.has(id)) return false;
+                return getVisibility(s) === 'PUBLIC';
+            });
+
+            document.getElementById('mySubjectsCount').textContent = String(mine.length);
+            document.getElementById('joinedSubjectsCount').textContent = String(joined.length);
+            document.getElementById('exploreSubjectsCount').textContent = String(explore.length);
+
+            renderSubjectList('mySubjectsList', mine, 'mine');
+            renderSubjectList('joinedSubjectsList', joined, 'joined');
+            renderSubjectList('exploreSubjectsList', explore, 'explore');
+        }
+
+        function renderTechTrends(trends) {
+            const container = document.getElementById('techTrendsContainer');
+            if (!trends.length) {
+                container.innerHTML = '<div class="placeholder">No tech trends available yet.</div>';
+                return;
             }
-        });
-    });
-}
 
-function renderSubjectSections(subjects) {
-    const mine = subjects.filter((s) => isCreatorOf(s));
-    const joined = subjects.filter((s) => {
-        const id = String(s._id || '');
-        return id && myMembershipSubjectIds.has(id) && !isCreatorOf(s);
-    });
-    const explore = subjects.filter((s) => {
-        const id = String(s._id || '');
-        if (!id) return false;
-        if (isCreatorOf(s)) return false;
-        if (myMembershipSubjectIds.has(id)) return false;
-        return getVisibility(s) === 'PUBLIC';
-    });
-
-    document.getElementById('mySubjectsCount').textContent = String(mine.length);
-    document.getElementById('joinedSubjectsCount').textContent = String(joined.length);
-    document.getElementById('exploreSubjectsCount').textContent = String(explore.length);
-
-    renderSubjectList('mySubjectsList', mine, 'mine');
-    renderSubjectList('joinedSubjectsList', joined, 'joined');
-    renderSubjectList('exploreSubjectsList', explore, 'explore');
-}
-
-function renderTechTrends(trends) {
-    const container = document.getElementById('techTrendsContainer');
-    if (!trends.length) {
-        container.innerHTML = '<div class="placeholder">No tech trends available yet.</div>';
-        return;
-    }
-
-    container.innerHTML = trends.map((trend) => {
-        const title = escapeHtml(trend.title || 'Untitled trend');
-        const summary = trend.summary ? '<span class="muted">' + escapeHtml(trend.summary) + '</span>' : '';
-        const safeUrl = sanitizeHttpUrl(trend.url || '');
-        if (safeUrl) {
-            return '<div class="list-item"><strong><a class="trend-link" href="' + safeUrl + '" target="_blank" rel="noopener noreferrer">' + title + '</a></strong>' + summary + '</div>';
-        }
-        return '<div class="list-item"><strong>' + title + '</strong>' + summary + '</div>';
-    }).join('');
-}
-
-function renderRecentUploads(items) {
-    const container = document.getElementById('recentUploads');
-    if (!items.length) {
-        container.innerHTML = '<div class="placeholder">No recent uploads available yet.</div>';
-        return;
-    }
-
-    container.innerHTML = items.map((item) => {
-        const title = item.title || item.name || 'Resource';
-        const subjectName = item.subjectId && item.subjectId.name ? item.subjectId.name : 'Unknown subject';
-        return '<div class="list-item"><strong>' + title + '</strong><span class="muted">' + subjectName + '</span></div>';
-    }).join('');
-}
-
-async function loadSubjects() {
-    try {
-        const response = await window.NexusAuth.apiFetch('/subjects', {
-            headers: { 'Content-Type': 'application/json' }
-        });
-
-        if (response.status === 401) {
-            forceLogout();
-            return;
+            container.innerHTML = trends.map((trend) => {
+                const title = escapeHtml(trend.title || 'Untitled trend');
+                const summary = trend.summary ? '<span class="muted">' + escapeHtml(trend.summary) + '</span>' : '';
+                const safeUrl = sanitizeHttpUrl(trend.url || '');
+                if (safeUrl) {
+                    return '<div class="list-item"><strong><a class="trend-link" href="' + safeUrl + '" target="_blank" rel="noopener noreferrer">' + title + '</a></strong>' + summary + '</div>';
+                }
+                return '<div class="list-item"><strong>' + title + '</strong>' + summary + '</div>';
+            }).join('');
         }
 
-        const data = await window.NexusAuth.parseJsonSafe(response);
-        allSubjects = Array.isArray(data) ? data : [];
-        renderSubjectSections(allSubjects);
-        updateCounts();
-    } catch (err) {
-        document.getElementById('mySubjectsList').innerHTML = '<div class="error">Failed to load subjects.</div>';
-        document.getElementById('joinedSubjectsList').innerHTML = '<div class="error">Failed to load subjects.</div>';
-        document.getElementById('exploreSubjectsList').innerHTML = '<div class="error">Failed to load subjects.</div>';
-        document.getElementById('subjectStatus').textContent = 'Load failed';
-        showToast('Failed to load subjects.', 'error');
-    }
-}
+        function renderRecentUploads(items) {
+            const container = document.getElementById('recentUploads');
+            if (!items.length) {
+                container.innerHTML = '<div class="placeholder">No recent uploads available yet.</div>';
+                return;
+            }
 
-async function loadTechTrends() {
-    try {
-        const response = await window.NexusAuth.apiFetch('/tech-trends?limit=5', {
-            headers: { 'Content-Type': 'application/json' }
-        });
-
-        if (response.status === 401) {
-            forceLogout();
-            return;
+            container.innerHTML = items.map((item) => {
+                const title = item.title || item.name || 'Resource';
+                const subjectName = item.subjectId && item.subjectId.name ? item.subjectId.name : 'Unknown subject';
+                return '<div class="list-item"><strong>' + title + '</strong><span class="muted">' + subjectName + '</span></div>';
+            }).join('');
         }
 
-        if (!response.ok) {
-            trendsCount = 0;
-            renderTechTrends([]);
+        async function loadSubjects() {
+            try {
+                const response = await window.NexusAuth.apiFetch('/subjects', {
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.status === 401) {
+                    forceLogout();
+                    return;
+                }
+
+                const data = await window.NexusAuth.parseJsonSafe(response);
+                allSubjects = Array.isArray(data) ? data : [];
+                renderSubjectSections(allSubjects);
+                updateCounts();
+            } catch (err) {
+                document.getElementById('mySubjectsList').innerHTML = '<div class="error">Failed to load subjects.</div>';
+                document.getElementById('joinedSubjectsList').innerHTML = '<div class="error">Failed to load subjects.</div>';
+                document.getElementById('exploreSubjectsList').innerHTML = '<div class="error">Failed to load subjects.</div>';
+                document.getElementById('subjectStatus').textContent = 'Load failed';
+                showToast('Failed to load subjects.', 'error');
+            }
+        }
+
+        async function loadTechTrends() {
+            try {
+                const response = await window.NexusAuth.apiFetch('/tech-trends?limit=5', {
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.status === 401) {
+                    forceLogout();
+                    return;
+                }
+
+                if (!response.ok) {
+                    trendsCount = 0;
+                    renderTechTrends([]);
+                    updateCounts();
+                    return;
+                }
+
+                const data = await window.NexusAuth.parseJsonSafe(response);
+                const trends = Array.isArray(data && data.data) ? data.data : [];
+                trendsCount = trends.length;
+                renderTechTrends(trends);
+                updateCounts();
+            } catch (err) {
+                document.getElementById('techTrendsContainer').innerHTML = '<div class="error">Failed to load trends.</div>';
+                showToast('Failed to load tech trends.', 'error');
+            }
+        }
+
+        async function loadRecentUploads() {
+            try {
+                const response = await window.NexusAuth.apiFetch('/resources?limit=3', {
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.status === 401) {
+                    forceLogout();
+                    return;
+                }
+
+                if (!response.ok) {
+                    uploadsCount = 0;
+                    renderRecentUploads([]);
+                    updateCounts();
+                    return;
+                }
+
+                const data = await window.NexusAuth.parseJsonSafe(response);
+                const items = Array.isArray(data && data.data) ? data.data : [];
+                uploadsCount = items.length;
+                renderRecentUploads(items);
+                updateCounts();
+            } catch (err) {
+                document.getElementById('recentUploads').innerHTML = '<div class="error">Failed to load uploads.</div>';
+                showToast('Failed to load recent uploads.', 'error');
+            }
+        }
+
+        async function initDashboard() {
+            const theme = window.NexusAuth.initTheme();
+            updateThemeIcon(theme);
+
+            const user = await window.NexusAuth.requireAuth('login.html');
+            if (!user) {
+                return;
+            }
+
+            activeUser = user;
+
+            if (activeUser.fullName) {
+                document.getElementById('userName').textContent = 'Signed in as ' + activeUser.fullName;
+            }
+
             updateCounts();
-            return;
+            await loadMyMemberships();
+            await Promise.all([loadSubjects(), loadTechTrends(), loadRecentUploads()]);
         }
 
-        const data = await window.NexusAuth.parseJsonSafe(response);
-        const trends = Array.isArray(data && data.data) ? data.data : [];
-        trendsCount = trends.length;
-        renderTechTrends(trends);
-        updateCounts();
-    } catch (err) {
-        document.getElementById('techTrendsContainer').innerHTML = '<div class="error">Failed to load trends.</div>';
-        showToast('Failed to load tech trends.', 'error');
-    }
-}
-
-async function loadRecentUploads() {
-    try {
-        const response = await window.NexusAuth.apiFetch('/resources?limit=3', {
-            headers: { 'Content-Type': 'application/json' }
-        });
-
-        if (response.status === 401) {
-            forceLogout();
-            return;
+        function handleThemeToggle() {
+            const newTheme = window.NexusAuth.toggleTheme();
+            updateThemeIcon(newTheme);
         }
 
-        if (!response.ok) {
-            uploadsCount = 0;
-            renderRecentUploads([]);
-            updateCounts();
-            return;
+        function updateThemeIcon(theme) {
+            const moon = document.querySelector('.moon-icon');
+            const sun = document.querySelector('.sun-icon');
+            if (theme === 'light-tech') {
+                moon.style.display = 'none';
+                sun.style.display = 'block';
+            } else {
+                moon.style.display = 'block';
+                sun.style.display = 'none';
+            }
         }
 
-        const data = await window.NexusAuth.parseJsonSafe(response);
-        const items = Array.isArray(data && data.data) ? data.data : [];
-        uploadsCount = items.length;
-        renderRecentUploads(items);
-        updateCounts();
-    } catch (err) {
-        document.getElementById('recentUploads').innerHTML = '<div class="error">Failed to load uploads.</div>';
-        showToast('Failed to load recent uploads.', 'error');
-    }
-}
-
-async function initDashboard() {
-    const user = await window.NexusAuth.requireAuth('login.html');
-    if (!user) {
-        return;
-    }
-
-    activeUser = user;
-
-    if (activeUser.fullName) {
-        document.getElementById('userName').textContent = 'Signed in as ' + activeUser.fullName;
-    }
-
-    updateCounts();
-    await loadMyMemberships();
-    await Promise.all([loadSubjects(), loadTechTrends(), loadRecentUploads()]);
-}
-
-initDashboard();
-</script>
+        initDashboard();
+    </script>
 </body>
+
 </html>

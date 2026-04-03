@@ -472,6 +472,27 @@ body {
     background: #23181b;
 }
 
+.project-featured {
+    border-color: var(--accent);
+    background: #1b2f4a;
+}
+
+.project-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.project-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+.project-link:hover {
+    text-decoration: underline;
+}
+
 @media (max-width: 1120px) {
     .grid {
         grid-template-columns: 1fr;
@@ -489,6 +510,7 @@ body {
     }
 }
 </style>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 </head>
 <body>
 <div class="app-shell">
@@ -606,6 +628,35 @@ body {
                 <div class="card-body">
                     <div class="list" id="roadmapsContainer">
                         <div class="placeholder">Join to view roadmaps.</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Subject Projects</h2>
+                    <span class="card-count" id="projectsCardCount">0 projects</span>
+                </div>
+                <div class="card-body">
+                    <div class="list" id="projectsContainer">
+                        <div class="placeholder">Join to view projects.</div>
+                    </div>
+
+                    <div id="newProjectWrap" style="margin-top: 12px; display:none;">
+                        <h3 style="font-size:0.9rem; margin-bottom:8px;">Submit a Project</h3>
+                        <div class="field">
+                            <label for="projectTitle">Project Title</label>
+                            <input id="projectTitle" class="input" placeholder="e.g., Nexus Note V2" />
+                        </div>
+                        <div class="field">
+                            <label for="projectLink">Project Link (URL)</label>
+                            <input id="projectLink" class="input" placeholder="https://github.com/..." />
+                        </div>
+                        <div class="field">
+                            <label for="projectDesc">Description</label>
+                            <textarea id="projectDesc" class="textarea" placeholder="Short overview of your project..."></textarea>
+                        </div>
+                        <button class="btn btn-primary" style="margin-top:10px;" onclick="submitProject()" id="submitProjectBtn">Submit Project</button>
                     </div>
                 </div>
             </section>
@@ -850,12 +901,14 @@ function setMembershipUi() {
     const leaveBtn = document.getElementById('leaveBtn');
     const status = document.getElementById('membershipStatus');
     const newThreadWrap = document.getElementById('newThreadWrap');
+    const newProjectWrap = document.getElementById('newProjectWrap');
 
     if (isMember) {
         joinBtn.style.display = 'none';
         leaveBtn.style.display = 'inline-flex';
         status.textContent = 'Joined';
         newThreadWrap.style.display = 'block';
+        newProjectWrap.style.display = 'block';
         return;
     }
 
@@ -863,6 +916,78 @@ function setMembershipUi() {
     leaveBtn.style.display = 'none';
     status.textContent = 'Not joined';
     newThreadWrap.style.display = 'none';
+    newProjectWrap.style.display = 'none';
+}
+
+function renderProjects(items) {
+    const container = document.getElementById('projectsContainer');
+    document.getElementById('projectsCardCount').textContent = items.length + ' projects';
+    
+    if (!items.length) {
+        container.innerHTML = '<div class="placeholder">No projects yet. Show off your work!</div>';
+        return;
+    }
+
+    container.innerHTML = items.map(p => {
+        const featuredClass = p.isFeatured ? 'project-featured' : '';
+        const badge = p.isFeatured ? '<span class="badge" style="border-color:var(--accent); color:var(--accent);">Featured</span>' : '';
+        const statusBadge = p.status !== 'approved' ? `<span class="badge">${p.status}</span>` : '';
+
+        return `
+            <div class="resource ${featuredClass}">
+                <div class="project-card-header">
+                    <span class="resource-title">${escapeHtml(p.title)}</span>
+                    ${badge} ${statusBadge}
+                </div>
+                <div class="resource-meta">by ${escapeHtml(p.createdBy?.fullName || 'User')}</div>
+                <div class="resource-meta" style="margin:4px 0;">${escapeHtml(p.description || '')}</div>
+                <a href="${escapeHtml(p.projectLink)}" target="_blank" class="project-link">View Project ↗</a>
+            </div>
+        `;
+    }).join('');
+}
+
+async function loadProjects() {
+    const res = await window.NexusAuth.apiFetch(`/projects/subject/${subjectId}`);
+    if (res.ok) {
+        const data = await res.json();
+        renderProjects(data);
+    }
+}
+
+async function submitProject() {
+    const title = document.getElementById('projectTitle').value.trim();
+    const projectLink = document.getElementById('projectLink').value.trim();
+    const description = document.getElementById('projectDesc').value.trim();
+    const btn = document.getElementById('submitProjectBtn');
+
+    if (!title || !projectLink) {
+        showToast('Title and Link are required', 'warning');
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+
+    const res = await window.NexusAuth.apiFetch('/projects/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, projectLink, description, subjectId })
+    });
+
+    btn.disabled = false;
+    btn.textContent = 'Submit Project';
+
+    if (res.ok) {
+        showToast('Project submitted for approval!', 'success');
+        document.getElementById('projectTitle').value = '';
+        document.getElementById('projectLink').value = '';
+        document.getElementById('projectDesc').value = '';
+        loadProjects();
+    } else {
+        const data = await res.json();
+        showToast(data.message || 'Submission failed', 'error');
+    }
 }
 
 function renderThreads(threads) {
@@ -1074,10 +1199,11 @@ async function loadRoomData() {
         document.getElementById('notesContainer').innerHTML = '<div class="placeholder">Join to view notes.</div>';
         document.getElementById('questionsContainer').innerHTML = '<div class="placeholder">Join to view interview questions.</div>';
         document.getElementById('roadmapsContainer').innerHTML = '<div class="placeholder">Join to view roadmaps.</div>';
+        document.getElementById('projectsContainer').innerHTML = '<div class="placeholder">Join to view projects.</div>';
         return;
     }
 
-    await Promise.all([loadThreads(), loadNotes(), loadFamousQuestions(), loadRoadmaps()]);
+    await Promise.all([loadThreads(), loadNotes(), loadFamousQuestions(), loadRoadmaps(), loadProjects()]);
 }
 
 function renderFamousQuestions(items) {

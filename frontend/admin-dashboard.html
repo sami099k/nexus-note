@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard | NexusNotes</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
+
+<style>
+    :root[data-theme="neon-dark"] {
+        --bg: #0f0c29;
+        --bg-soft: rgba(22, 27, 34, 0.75);
+        --panel: rgba(31, 38, 48, 0.8);
+        --line: rgba(48, 54, 61, 0.6);
+        --line-soft: rgba(38, 44, 54, 0.5);
+        --text: #e6edf3;
+        --muted: #9198a1;
+        --accent: #2f81f7;
+        --accent-soft: rgba(11, 61, 145, 0.6);
+        --success: #238636;
+        --danger: #f85149;
+        --warning: #d29922;
+        --card-shadow: none;
+        --glass-blur: blur(10px);
+    }
+
+    :root[data-theme="sepia"] {
+        --bg: #F4ECD8;
+        --bg-soft: #E5D3B3;
+        --panel: #DBC9A7;
+        --line: #D1BFA0;
+        --line-soft: #E5D3B3;
+        --text: #5B4636;
+        --muted: #8C735B;
+        --accent: #A16207;
+        --accent-soft: #FDE68A;
+        --success: #166534;
+        --danger: #991B1B;
+        --warning: #ca8a04;
+        --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --glass-blur: none;
+    }
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        line-height: 1.6;
+    }
+
+    body {
+        font-family: 'Space Grotesk', sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    [data-theme="neon-dark"] body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background-image: repeating-linear-gradient(
+            45deg,
+            rgba(255,255,255,0.03) 0px,
+            rgba(255,255,255,0.03) 1px,
+            transparent 1px,
+            transparent 18px
+        );
+    }
+
+    [data-theme="neon-dark"] body::after {
+        content: '';
+        position: fixed;
+        top: -20%;
+        left: -20%;
+        width: 140%;
+        height: 140%;
+        z-index: 0;
+        pointer-events: none;
+        background:
+            radial-gradient(ellipse 450px 450px at 75% 20%, rgba(83,74,183,0.35) 0%, transparent 70%),
+            radial-gradient(ellipse 400px 400px at 15% 80%, rgba(186,117,23,0.25) 0%, transparent 70%),
+            radial-gradient(ellipse 350px 350px at 50% 50%, rgba(153,53,86,0.20) 0%, transparent 70%);
+        filter: blur(50px);
+        animation: moveAround 40s ease-in-out infinite alternate;
+    }
+
+    @keyframes moveAround {
+        0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+        33% { transform: translate(-5%, 8%) rotate(2deg) scale(1.05); }
+        66% { transform: translate(4%, -5%) rotate(-2deg) scale(0.95); }
+        100% { transform: translate(-2%, 2%) rotate(1deg) scale(1.02); }
+    }
+
+    body > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    .app-shell {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 260px 1fr;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+        background: var(--bg-soft);
+        border-right: 1px solid var(--line);
+        padding: 20px 14px;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+    }
+
+    .brand {
+        display: block;
+        padding: 0 8px 16px;
+        border-bottom: 1px solid var(--line-soft);
+        margin-bottom: 16px;
+    }
+
+    .brand-name {
+        font-family: 'Fraunces', serif;
+        font-size: 1.2rem;
+        letter-spacing: 0.01em;
+        color: var(--text);
+    }
+
+    .brand-sub {
+        margin-top: 4px;
+        color: var(--accent);
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+
+    .nav-group-title {
+        color: var(--muted);
+        font-size: 0.77rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin: 14px 8px 8px;
+    }
+
+    .nav {
+        list-style: none;
+        display: grid;
+        gap: 6px;
+    }
+
+    .nav-item {
+        color: var(--text);
+        opacity: 0.8;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+    }
+
+    .nav-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+        opacity: 1;
+    }
+
+    [data-theme="sepia"] .nav-item:hover {
+        background: rgba(0, 0, 0, 0.05);
+    }
+
+    .nav-item.active {
+        background: var(--accent-soft);
+        border-color: var(--accent);
+        color: var(--text);
+        opacity: 1;
+        font-weight: 600;
+    }
+
+    [data-theme="neon-dark"] .nav-item.active {
+        color: #ffffff;
+    }
+
+    .nav-item.logout {
+        color: var(--danger);
+        margin-top: 20px;
+    }
+
+    .nav-item.logout:hover {
+        background: rgba(255, 81, 73, 0.1);
+    }
+
+    /* MAIN CONTENT */
+    .main {
+        padding: 20px 30px;
+    }
+
+    .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .page-title {
+        font-family: 'Fraunces', serif;
+        font-size: 1.5rem;
+        color: var(--text);
+    }
+
+    .topbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .theme-toggle {
+        background: var(--bg-soft);
+        border: 1px solid var(--line);
+        color: var(--text);
+        padding: 8px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+    }
+
+    .theme-toggle:hover {
+        border-color: var(--accent);
+    }
+
+    .theme-icon {
+        width: 18px;
+        height: 18px;
+        fill: currentColor;
+    }
+
+    .notification-bell {
+        position: relative;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        background: var(--bg-soft);
+        border: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: var(--glass-blur);
+    }
+
+    .notification-bell:hover {
+        border-color: var(--muted);
+    }
+
+    .bell-icon {
+        width: 20px;
+        height: 20px;
+        fill: var(--text);
+    }
+
+    .badge {
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        background: var(--danger);
+        color: white;
+        font-size: 10px;
+        font-weight: 700;
+        min-width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2px;
+    }
+
+    /* STATS BAR */
+    .stats-bar {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 30px;
+    }
+
+    .stat-card {
+        background: var(--bg-soft);
+        border: 1px solid var(--line);
+        padding: 20px;
+        border-radius: 12px;
+        cursor: pointer;
+        backdrop-filter: var(--glass-blur);
+    }
+
+    [data-theme="sepia"] .stat-card {
+        background: #FFF8E7;
+    }
+
+    .stat-label {
+        color: var(--muted);
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+    }
+
+    .stat-value {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    /* CARDS & TABLES */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .card {
+        background: var(--card, var(--bg-soft));
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+        backdrop-filter: var(--glass-blur);
+        box-shadow: var(--card-shadow);
+    }
+
+    [data-theme="sepia"] .card { --card: #FFF8E7; }
+
+    .card-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-title { font-weight: 700; font-size: 1.1rem; color: var(--text); }
+
+    .table-container { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 12px 20px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 0.85rem; }
+    td { padding: 14px 20px; border-bottom: 1px solid var(--line-soft); font-size: 0.9rem; color: var(--text); }
+
+    .btn {
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        color: var(--text);
+        transition: all 0.2s;
+        backdrop-filter: var(--glass-blur);
+    }
+
+    .btn-danger { color: var(--danger); background: rgba(255, 81, 73, 0.1); border-color: var(--danger); }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: white; }
+
+    /* FORMS */
+    .admin-form { display: grid; gap: 20px; max-width: 600px; padding: 20px; }
+    .form-group { display: grid; gap: 8px; }
+    label { font-size: 0.9rem; font-weight: 500; color: var(--text); }
+    input, select, textarea {
+        background: var(--bg);
+        border: 1px solid var(--line);
+        color: var(--text);
+        padding: 10px 12px;
+        border-radius: 8px;
+        outline: none;
+        font-family: inherit;
+    }
+
+    /* DRAWER */
+    .drawer-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: none; }
+    .drawer {
+        position: fixed; top: 0; right: -400px; width: 400px; height: 100vh;
+        background: var(--bg-soft); border-left: 1px solid var(--line); z-index: 1001;
+        transition: right 0.3s ease; display: flex; flex-direction: column;
+        backdrop-filter: var(--glass-blur);
+    }
+    [data-theme="sepia"] .drawer { background: #F4ECD8; }
+    .drawer.open { right: 0; }
+    .drawer-header { padding: 20px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
+    .drawer-body { flex: 1; overflow-y: auto; padding: 10px; }
+    .notification-item {
+        padding: 15px; border-radius: 10px; border: 1px solid var(--line-soft); margin-bottom: 10px;
+        background: rgba(16, 22, 29, 0.4); display: flex; flex-direction: column; gap: 8px;
+    }
+    [data-theme="sepia"] .notification-item { background: #FFF8E7; }
+
+    @media (max-width: 1000px) {
+        .app-shell { grid-template-columns: 1fr; }
+        .sidebar { display: none; }
+        .stats-bar { grid-template-columns: repeat(2, 1fr); }
+    }
+</style>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+</head>
+<body>
+
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-name">NexusNotes</div>
+            <div class="brand-sub">Admin Console</div>
+        </div>
+
+        <div class="nav-group-title">Management</div>
+        <div class="nav">
+            <div class="nav-item active" data-tab="resources">Resources</div>
+            <div class="nav-item" data-tab="threads">Threads</div>
+            <div class="nav-item" data-tab="questions">Famous Questions</div>
+            <div class="nav-item" data-tab="projects">Projects</div>
+            <div class="nav-item" data-tab="users">Users</div>
+            <div class="nav-item" data-tab="subjects">Subjects</div>
+            <div class="nav-item" data-tab="add-content">Add Content</div>
+        </div>
+
+        <div class="nav">
+            <div class="nav-item logout" onclick="window.NexusAuth.logout()">Logout</div>
+        </div>
+    </aside>
+
+    <main class="main">
+        <div class="topbar">
+            <h1 class="page-title" id="pageTitle">Admin Dashboard</h1>
+            <div class="topbar-actions">
+                <button class="theme-toggle" onclick="handleThemeToggle()" title="Toggle Theme">
+                    <svg class="theme-icon moon-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    <svg class="theme-icon sun-icon" style="display:none;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="18.36" x2="5.64" y2="16.92"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                </button>
+                <div class="notification-bell" id="notifBell">
+                    <svg class="bell-icon" viewBox="0 0 16 16">
+                        <path d="M8 16a2 2 0 0 0 1.985-1.75c.017-.137-.097-.25-.235-.25h-3.5c-.138 0-.252.113-.235.25A2 2 0 0 0 8 16Zm3.187-2.146c.114-.115.213-.238.302-.367C12.016 12.119 13 10.647 13 8.5c0-1.815-.457-3.227-1.314-4.233C10.647 3.21 9.443 2.5 8 2.5c-1.443 0-2.647.71-3.686 1.767C3.457 5.273 3 6.685 3 8.5c0 2.147.984 3.619 1.511 4.387.09.129.188.252.302.367l.187.146h6l.187-.146Z M8 1.5c-2.363 0-4.545 1.259-5.477 3.316C2.17 5.582 1.5 6.946 1.5 8.5c0 1.832.51 3.235 1.157 4.19.167.246.353.486.55.719L2.5 14.5a.75.75 0 0 0 .75.75h9.5a.75.75 0 0 0 .75-.75l-.707-1.091c.197-.233.383-.473.55-.719.648-.955 1.157-2.358 1.157-4.19 0-1.554-.67-2.918-1.023-3.684C12.545 2.759 10.363 1.5 8 1.5Z"></path>
+                    </svg>
+                    <span class="badge" id="notifCount" style="display:none">0</span>
+                </div>
+            </div>
+        </div>
+
+        <section class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-label">Total Users</div>
+                <div class="stat-value" id="statUsers">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Subjects</div>
+                <div class="stat-value" id="statSubjects">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Resources</div>
+                <div class="stat-value" id="statResources">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Unread Notifications</div>
+                <div class="stat-value" id="statNotifs">0</div>
+            </div>
+        </section>
+
+        <!-- RESOURCES TAB -->
+        <section id="tab-resources" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">All Resources</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Resource Name</th>
+                                <th>Subject</th>
+                                <th>Uploader</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resourcesList"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- THREADS TAB -->
+        <section id="tab-threads" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">All Discussion Threads</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Thread Title</th>
+                                <th>Subject</th>
+                                <th>Author</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="threadsList"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- QUESTIONS TAB -->
+        <section id="tab-questions" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Famous Questions</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Question</th>
+                                <th>Subject</th>
+                                <th>Created By</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="questionsList"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- PROJECTS TAB -->
+        <section id="tab-projects" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">All Project Submissions</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Project Title</th>
+                                <th>Subject</th>
+                                <th>Creator</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="projectsList"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- USERS TAB -->
+        <section id="tab-users" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">All Users</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Full Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersList"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SUBJECTS TAB -->
+        <section id="tab-subjects" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">All Subjects</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Code</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subjectsList"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ADD CONTENT TAB -->
+        <section id="tab-add-content" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Create New Content as Admin</h2>
+                </div>
+                <div class="admin-form">
+                    <div class="form-group">
+                        <label>Content Type</label>
+                        <select id="contentTypeSelect" onchange="toggleFormFields()">
+                            <option value="resource">Resource (File)</option>
+                            <option value="thread">Discussion Thread</option>
+                            <option value="subject">New Subject</option>
+                        </select>
+                    </div>
+
+                    <div id="subjectTargetGroup" class="form-group">
+                        <label>Target Subject</label>
+                        <select id="subjectSelect"></select>
+                    </div>
+
+                    <div id="resourceFields">
+                        <div class="form-group" style="margin-top:10px;">
+                            <label>Title</label>
+                            <input type="text" id="resTitle" placeholder="Resource title">
+                        </div>
+                        <div class="form-group" style="margin-top:10px;">
+                            <label>Type</label>
+                            <select id="resType">
+                                <option value="NOTES">Notes</option>
+                                <option value="QUESTION_BANK">Question Bank</option>
+                                <option value="PROJECT_ARCHIVE">Project Archive</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-top:10px;">
+                            <label>File</label>
+                            <input type="file" id="resFile">
+                        </div>
+                    </div>
+
+                    <div id="threadFields" style="display:none">
+                        <div class="form-group" style="margin-top:10px;">
+                            <label>Thread Title</label>
+                            <input type="text" id="threadTitle" placeholder="Thread title">
+                        </div>
+                        <div class="form-group" style="margin-top:10px;">
+                            <label>Body</label>
+                            <textarea id="threadBody" rows="4" placeholder="Thread content"></textarea>
+                        </div>
+                    </div>
+
+                    <div id="subjectFields" style="display:none">
+                        <div class="form-group" style="margin-top:10px;">
+                            <label>Subject Name</label>
+                            <input type="text" id="newSubName" placeholder="e.g. Operating Systems">
+                        </div>
+                        <div class="form-group" style="margin-top:10px;">
+                            <label>Code</label>
+                            <input type="text" id="newSubCode" placeholder="e.g. CS301">
+                        </div>
+                        <div class="form-group" style="margin-top:10px;">
+                            <label>Description</label>
+                            <textarea id="newSubDesc" rows="3" placeholder="Description of the subject"></textarea>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="submitAdminContent()" style="margin-top:10px;">Create Content</button>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- NOTIFICATION DRAWER -->
+<div class="drawer-backdrop" id="drawerBackdrop"></div>
+<div class="drawer" id="notifDrawer">
+    <div class="drawer-header">
+        <h2 class="card-title">Notifications</h2>
+        <button class="btn" onclick="toggleDrawer(false)">Close</button>
+    </div>
+    <div class="drawer-body" id="notifList">
+        <div class="empty-state">No unread notifications</div>
+    </div>
+</div>
+
+<script src="auth.js"></script>
+<script>
+// Dashboard State & Logic
+let subjects = [];
+
+function handleThemeToggle() {
+    const newTheme = window.NexusAuth.toggleTheme();
+    updateThemeIcon(newTheme);
+}
+
+function updateThemeIcon(theme) {
+    const moon = document.querySelector('.moon-icon');
+    const sun = document.querySelector('.sun-icon');
+    if (theme === 'sepia') {
+        moon.style.display = 'none';
+        sun.style.display = 'block';
+    } else {
+        moon.style.display = 'block';
+        sun.style.display = 'none';
+    }
+}
+
+async function initAdmin() {
+    const theme = window.NexusAuth.initTheme();
+    updateThemeIcon(theme);
+
+    const user = await window.NexusAuth.requireAuth('login.html');
+    if (!user || (user.role !== 'ADMIN' && user.role !== 'OWNER')) {
+        window.location.href = 'home.html';
+        return;
+    }
+
+    loadStats();
+    loadResources();
+    loadThreads();
+    loadQuestions();
+    loadProjectsAdmin();
+    loadUsers();
+    loadSubjectsTable();
+    loadNotifications();
+    loadSubjects();
+}
+
+// Tab Switching
+function switchTab(tab) {
+    document.querySelectorAll('.nav-item').forEach(i => {
+        if(i.dataset.tab === tab) i.classList.add('active');
+        else i.classList.remove('active');
+    });
+    
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById(`tab-${tab}`).classList.add('active');
+}
+
+document.querySelectorAll('.nav-item[data-tab]').forEach(item => {
+    item.addEventListener('click', () => switchTab(item.dataset.tab));
+});
+
+// Stat card click handlers
+document.getElementById('statUsers').parentElement.onclick = () => switchTab('users');
+document.getElementById('statSubjects').parentElement.onclick = () => switchTab('subjects');
+document.getElementById('statResources').parentElement.onclick = () => switchTab('projects');
+document.getElementById('statNotifs').parentElement.onclick = () => toggleDrawer(true);
+document.querySelectorAll('.stat-card').forEach(c => c.style.cursor = 'pointer');
+
+// Notifications Drawer
+const bell = document.getElementById('notifBell');
+const drawer = document.getElementById('notifDrawer');
+const backdrop = document.getElementById('drawerBackdrop');
+
+function toggleDrawer(open) {
+    if (open) {
+        drawer.classList.add('open');
+        backdrop.style.display = 'block';
+        loadNotifications();
+    } else {
+        drawer.classList.remove('open');
+        backdrop.style.display = 'none';
+    }
+}
+
+bell.addEventListener('click', () => toggleDrawer(true));
+backdrop.addEventListener('click', () => toggleDrawer(false));
+
+// Data Fetching
+async function loadStats() {
+    const res = await window.NexusAuth.apiFetch('/admin/stats');
+    if (res.ok) {
+        const data = await res.json();
+        document.getElementById('statUsers').textContent = data.userCount;
+        document.getElementById('statSubjects').textContent = data.subjectCount;
+        document.getElementById('statResources').textContent = data.resourceCount;
+        document.getElementById('statNotifs').textContent = data.unreadNotifications;
+        
+        const badge = document.getElementById('notifCount');
+        if (data.unreadNotifications > 0) {
+            badge.textContent = data.unreadNotifications;
+            badge.style.display = 'flex';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+}
+
+async function loadResources() {
+    const res = await window.NexusAuth.apiFetch('/admin/resources');
+    if (res.ok) {
+        const data = await res.json();
+        const tbody = document.getElementById('resourcesList');
+        tbody.innerHTML = data.map(r => `
+            <tr id="res-${r._id}">
+                <td>${r.title}</td>
+                <td>${r.subjectId ? r.subjectId.name : 'N/A'}</td>
+                <td>${r.uploadedBy ? r.uploadedBy.fullName : 'System'}</td>
+                <td>${new Date(r.createdAt).toLocaleDateString()}</td>
+                <td><button class="btn btn-danger" onclick="deleteResource('${r._id}')">Delete</button></td>
+            </tr>
+        `).join('');
+    }
+}
+
+async function loadThreads() {
+    const res = await window.NexusAuth.apiFetch('/admin/threads');
+    if (res.ok) {
+        const data = await res.json();
+        const tbody = document.getElementById('threadsList');
+        tbody.innerHTML = data.map(t => `
+            <tr id="thread-${t._id}">
+                <td>${t.title}</td>
+                <td>${t.subjectId ? t.subjectId.name : 'N/A'}</td>
+                <td>${t.createdBy ? t.createdBy.fullName : 'N/A'}</td>
+                <td>${new Date(t.createdAt).toLocaleDateString()}</td>
+                <td><button class="btn btn-danger" onclick="deleteThread('${t._id}')">Delete</button></td>
+            </tr>
+        `).join('');
+    }
+}
+
+async function loadQuestions() {
+    const res = await window.NexusAuth.apiFetch('/admin/famous-questions');
+    if (res.ok) {
+        const data = await res.json();
+        const tbody = document.getElementById('questionsList');
+        tbody.innerHTML = data.map(q => `
+            <tr id="question-${q._id}">
+                <td>${q.question}</td>
+                <td>${q.subjectId ? q.subjectId.name : 'N/A'}</td>
+                <td>${q.createdBy ? q.createdBy.fullName : 'N/A'}</td>
+                <td>${new Date(q.createdAt).toLocaleDateString()}</td>
+                <td><button class="btn btn-danger" onclick="deleteQuestion('${q._id}')">Delete</button></td>
+            </tr>
+        `).join('');
+    }
+}
+
+async function loadNotifications() {
+    const res = await window.NexusAuth.apiFetch('/admin/notifications');
+    if (res.ok) {
+        const data = await res.json();
+        const list = document.getElementById('notifList');
+        if (data.length === 0) {
+            list.innerHTML = '<div class="empty-state">No unread notifications</div>';
+            return;
+        }
+        list.innerHTML = data.map(n => `
+            <div class="notification-item" id="notif-${n._id}">
+                <div class="notif-top">
+                    <span class="notif-type">${n.type.replace('_', ' ')}</span>
+                    <span class="notif-time">${new Date(n.createdAt).toLocaleTimeString()}</span>
+                </div>
+                <div class="notif-msg">${n.message}</div>
+                <div class="notif-actions">
+                    <button class="btn" onclick="markRead('${n._id}')">Mark as read</button>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+async function loadSubjects() {
+    const res = await window.NexusAuth.apiFetch('/subjects');
+    if (res.ok) {
+        subjects = await res.json();
+        const select = document.getElementById('subjectSelect');
+        select.innerHTML = subjects.map(s => `<option value="${s._id}">${s.name}</option>`).join('');
+    }
+}
+
+async function loadUsers() {
+    const res = await window.NexusAuth.apiFetch('/admin/users');
+    if (res.ok) {
+        const data = await res.json();
+        const tbody = document.getElementById('usersList');
+        tbody.innerHTML = data.map(u => `
+            <tr id="user-${u._id}">
+                <td>${u.fullName}</td>
+                <td>${u.email}</td>
+                <td><span class="badge" style="background: ${u.role==='ADMIN'?'var(--accent)':'var(--success)'}; position:static;">${u.role}</span></td>
+                <td>${new Date(u.createdAt).toLocaleDateString()}</td>
+                <td><button class="btn btn-danger" onclick="deleteUser('${u._id}')" ${u.role==='OWNER'?'disabled':''}>Delete</button></td>
+            </tr>
+        `).join('');
+    }
+}
+
+async function loadSubjectsTable() {
+    const res = await window.NexusAuth.apiFetch('/admin/subjects');
+    if (res.ok) {
+        const data = await res.json();
+        const tbody = document.getElementById('subjectsList');
+        tbody.innerHTML = data.map(s => `
+            <tr id="sub-${s._id}">
+                <td>${s.name}</td>
+                <td>${s.code}</td>
+                <td style="max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${s.description || '-'}</td>
+                <td><button class="btn btn-danger" onclick="deleteSubject('${s._id}')">Delete</button></td>
+            </tr>
+        `).join('');
+    }
+}
+
+// Actions
+async function deleteUser(id) {
+    if (!confirm('Are you sure you want to delete this user? This cannot be undone.')) return;
+    const res = await window.NexusAuth.apiFetch(`/admin/users/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+        document.getElementById(`user-${id}`).remove();
+        window.NexusAuth.showToast('User deleted', 'success');
+        loadStats();
+    } else {
+        const err = await res.json();
+        window.NexusAuth.showToast(err.message || 'Failed to delete', 'error');
+    }
+}
+
+async function deleteSubject(id) {
+    if (!confirm('Are you sure you want to delete this subject? All related data may be affected.')) return;
+    const res = await window.NexusAuth.apiFetch(`/admin/subjects/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+        document.getElementById(`sub-${id}`).remove();
+        window.NexusAuth.showToast('Subject deleted', 'success');
+        loadStats();
+        loadSubjects(); // Refresh dropdowns
+    }
+}
+
+async function deleteResource(id) {
+    if (!confirm('Are you sure you want to delete this resource?')) return;
+    const res = await window.NexusAuth.apiFetch(`/admin/resources/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+        document.getElementById(`res-${id}`).remove();
+        window.NexusAuth.showToast('Resource deleted', 'success');
+        loadStats();
+    }
+}
+
+async function deleteThread(id) {
+    if (!confirm('Are you sure you want to delete this thread?')) return;
+    const res = await window.NexusAuth.apiFetch(`/admin/threads/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+        document.getElementById(`thread-${id}`).remove();
+        window.NexusAuth.showToast('Thread deleted', 'success');
+        loadStats();
+    }
+}
+
+async function deleteQuestion(id) {
+    if (!confirm('Are you sure you want to delete this question?')) return;
+    const res = await window.NexusAuth.apiFetch(`/admin/famous-questions/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+        document.getElementById(`question-${id}`).remove();
+        window.NexusAuth.showToast('Question deleted', 'success');
+        loadStats();
+    }
+}
+
+async function markRead(id) {
+    const res = await window.NexusAuth.apiFetch(`/admin/notifications/${id}/read`, { method: 'PATCH' });
+    if (res.ok) {
+        document.getElementById(`notif-${id}`).remove();
+        loadStats();
+        if (document.getElementById('notifList').children.length === 0) {
+            document.getElementById('notifList').innerHTML = '<div class="empty-state">No unread notifications</div>';
+        }
+    }
+}
+
+function toggleFormFields() {
+    const type = document.getElementById('contentTypeSelect').value;
+    document.getElementById('resourceFields').style.display = type === 'resource' ? 'block' : 'none';
+    document.getElementById('threadFields').style.display = type === 'thread' ? 'block' : 'none';
+    document.getElementById('subjectFields').style.display = type === 'subject' ? 'block' : 'none';
+    document.getElementById('subjectTargetGroup').style.display = type === 'subject' ? 'none' : 'block';
+}
+
+async function loadProjectsAdmin() {
+    const res = await window.NexusAuth.apiFetch('/admin/projects'); 
+    if (res.ok) {
+        const data = await res.json();
+        const tbody = document.getElementById('projectsList');
+        tbody.innerHTML = data.map(p => `
+            <tr id="proj-${p._id}">
+                <td>${p.title}</td>
+                <td>${p.subjectId ? p.subjectId.name : 'N/A'}</td>
+                <td>${p.createdBy ? p.createdBy.fullName : 'N/A'}</td>
+                <td>
+                    <span class="badge" style="background: ${p.status==='approved'?'var(--success)':(p.status==='rejected'?'var(--danger)':'var(--warning)')}; position:static;">
+                        ${p.status}
+                    </span>
+                    ${p.isFeatured ? '<span class="badge" style="background:var(--accent); position:static; margin-left:4px;">Featured</span>' : ''}
+                </td>
+                <td>
+                    <div style="display:flex; gap:4px;">
+                        <button class="btn" onclick="updateProjectStatusAdmin('${p._id}', 'approved')" ${p.status==='approved'?'disabled':''}>Approve</button>
+                        <button class="btn" onclick="updateProjectStatusAdmin('${p._id}', 'rejected')" ${p.status==='rejected'?'disabled':''}>Reject</button>
+                        <button class="btn" onclick="toggleFeaturedAdmin('${p._id}')">${p.isFeatured?'Unfeature':'Feature'}</button>
+                        <button class="btn btn-danger" onclick="deleteProjectAdmin('${p._id}')">Delete</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+}
+
+async function updateProjectStatusAdmin(id, status) {
+    const res = await window.NexusAuth.apiFetch(`/projects/status/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+    });
+    if (res.ok) {
+        window.NexusAuth.showToast(`Project ${status}`, 'success');
+        loadProjectsAdmin();
+    }
+}
+
+async function toggleFeaturedAdmin(id) {
+    const res = await window.NexusAuth.apiFetch(`/projects/feature/${id}`, { method: 'PATCH' });
+    if (res.ok) {
+        window.NexusAuth.showToast('Featured status updated', 'success');
+        loadProjectsAdmin();
+    }
+}
+
+async function deleteProjectAdmin(id) {
+    if (!confirm('Delete this project submission?')) return;
+    const res = await window.NexusAuth.apiFetch(`/projects/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+        document.getElementById(`proj-${id}`).remove();
+        window.NexusAuth.showToast('Project deleted', 'success');
+    }
+}
+
+async function submitAdminContent() {
+    const type = document.getElementById('contentTypeSelect').value;
+    
+    if (type === 'subject') {
+        const name = document.getElementById('newSubName').value.trim();
+        const code = document.getElementById('newSubCode').value.trim().toUpperCase();
+        const description = document.getElementById('newSubDesc').value.trim();
+
+        if (!name || !code) {
+            window.NexusAuth.showToast('Name and Code are required', 'error');
+            return;
+        }
+
+        const res = await window.NexusAuth.apiFetch('/admin/subjects', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, code, description })
+        });
+
+        if (res.ok) {
+            window.NexusAuth.showToast('Subject created successfully', 'success');
+            loadSubjectsTable();
+            loadSubjects();
+            loadStats();
+            // Clear fields
+            document.getElementById('newSubName').value = '';
+            document.getElementById('newSubCode').value = '';
+            document.getElementById('newSubDesc').value = '';
+        } else {
+            const err = await res.json();
+            window.NexusAuth.showToast(err.message || 'Creation failed', 'error');
+        }
+        return;
+    }
+
+    const subjectId = document.getElementById('subjectSelect').value;
+    if (type === 'resource') {
+        const title = document.getElementById('resTitle').value;
+        const resType = document.getElementById('resType').value;
+        const fileInput = document.getElementById('resFile');
+        
+        if (!title || !fileInput.files[0]) {
+            window.NexusAuth.showToast('Title and file required', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('resourceType', resType);
+        formData.append('subjectId', subjectId);
+        formData.append('module', 'General');
+        formData.append('file', fileInput.files[0]);
+
+        const res = await fetch(window.NexusAuth.getApiBase() + '/admin/resources/upload', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + window.NexusAuth.getToken() },
+            body: formData
+        });
+
+        if (res.ok) {
+            window.NexusAuth.showToast('Resource created successfully', 'success');
+            loadResources();
+            loadStats();
+        } else {
+            const err = await res.json();
+            window.NexusAuth.showToast(err.message || 'Upload failed', 'error');
+        }
+    } else {
+        const title = document.getElementById('threadTitle').value;
+        const body = document.getElementById('threadBody').value;
+
+        if (!title || !body) {
+            window.NexusAuth.showToast('Title and body required', 'error');
+            return;
+        }
+
+        const res = await window.NexusAuth.apiFetch('/admin/threads', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ subjectId, title, body })
+        });
+
+        if (res.ok) {
+            window.NexusAuth.showToast('Thread created successfully', 'success');
+            loadThreads();
+            loadStats();
+        }
+    }
+}
+
+initAdmin();
+</script>
+
+</body>
+</html>

@@ -387,6 +387,18 @@
     sanitizeUrl,
     showToast,
     logout,
-    confirmLogout
+    confirmLogout,
+    initTheme: function() {
+      const savedTheme = localStorage.getItem('nexus-theme') || 'neon-dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      return savedTheme;
+    },
+    toggleTheme: function() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'neon-dark' ? 'sepia' : 'neon-dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('nexus-theme', newTheme);
+      return newTheme;
+    }
   };
 })(window);

@@ -122,10 +122,36 @@ a { color: inherit; text-decoration: none; }
 
 .right h2 {
     font-family: 'Fraunces', serif;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
 }
 
-.right p { color: var(--muted); margin-bottom: 20px; font-size: 13px; }
+.role-toggle {
+    display: flex;
+    background: #0a192f;
+    padding: 4px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.role-option {
+    flex: 1;
+    text-align: center;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 10px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    color: var(--muted);
+}
+
+.role-option.active {
+    background: var(--accent2);
+    color: #052531;
+    font-weight: 600;
+}
+
+.right p.subtitle { color: var(--muted); margin-bottom: 15px; font-size: 13px; }
 
 input {
     width: 100%;
@@ -133,7 +159,7 @@ input {
     border-radius: 10px;
     background: #0e223d;
     padding: 10px 12px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     color: var(--text);
     outline: none;
 }
@@ -199,6 +225,7 @@ button:hover {
     50% { transform: translateY(-16px) translateX(12px); }
 }
 </style>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 </head>
 
 <body>
@@ -220,7 +247,12 @@ button:hover {
 
 <div class="right">
     <h2>Sign Up</h2>
-    <p>Create your account</p>
+    <p class="subtitle">Join the NexusNotes community.</p>
+
+    <div class="role-toggle" id="roleToggle">
+        <div class="role-option active" data-role="user">Student</div>
+        <div class="role-option" data-role="admin">Admin</div>
+    </div>
 
     <input type="text" id="fullName" placeholder="Full Name">
     <input type="email" id="email" placeholder="Email">
@@ -245,9 +277,27 @@ button:hover {
 
 <script src="auth.js"></script>
 <script>
+let selectedRole = 'user';
+
 (async () => {
-    await window.NexusAuth.redirectIfAuthenticated('home.html');
+    const user = window.NexusAuth.getUser();
+    if (user) {
+        if (user.role === 'ADMIN' || user.role === 'OWNER') {
+            window.location.href = 'admin-dashboard.html';
+        } else {
+            window.location.href = 'home.html';
+        }
+    }
 })();
+
+// Role toggle logic
+document.querySelectorAll('.role-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+        document.querySelectorAll('.role-option').forEach(o => o.classList.remove('active'));
+        opt.classList.add('active');
+        selectedRole = opt.dataset.role;
+    });
+});
 
 async function handleRegister() {
     const fullName = document.getElementById('fullName').value.trim();
@@ -284,7 +334,12 @@ async function handleRegister() {
         const res = await fetch(window.NexusAuth.getApiBase() + '/auth/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fullName, email, password })
+            body: JSON.stringify({ 
+                fullName, 
+                email, 
+                password,
+                role: selectedRole.toUpperCase() // Sends "USER" or "ADMIN"
+            })
         });
 
         const data = await window.NexusAuth.parseJsonSafe(res);
@@ -294,7 +349,12 @@ async function handleRegister() {
         }
 
         window.NexusAuth.saveSession(data.token, data.user);
-        window.location.href = 'home.html';
+        
+        if (data.user.role === 'ADMIN' || data.user.role === 'OWNER') {
+            window.location.href = 'admin-dashboard.html';
+        } else {
+            window.location.href = 'home.html';
+        }
     } catch (err) {
         errorMsg.textContent = err.message;
         errorMsg.style.display = 'block';
